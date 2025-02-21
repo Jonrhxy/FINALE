@@ -7,17 +7,6 @@
     android:layout_height="match_parent"
     android:background="@drawable/profbg">
 
-
-    <!-- Notification Icon -->
-    <ImageView
-        android:id="@+id/notificationIcon"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:src="@drawable/notification"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_margin="16dp" />
-
     <!-- Profile Image -->
     <ImageView
         android:id="@+id/profileImg"

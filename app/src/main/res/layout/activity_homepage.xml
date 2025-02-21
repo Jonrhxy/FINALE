@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="@color/main">
+    android:background="@color/gamebg">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -32,32 +32,32 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="15sp"
-            android:background="@drawable/attenbg"
+            android:background="@drawable/btnlogin"
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
 
             <com.google.android.material.tabs.TabLayout
                 android:id="@+id/foodhome"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="67dp"
                 app:tabIndicatorColor="@color/Brown"
                 app:tabSelectedTextColor="@color/Green"
                 app:tabTextColor="@color/NudeGreen">
 
                 <com.google.android.material.tabs.TabItem
-                    android:text="@string/bfast"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_width="wrap_content" />
+                    android:text="@string/bfast" />
 
                 <com.google.android.material.tabs.TabItem
-                    android:text="@string/lunch"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"/>
+                    android:text="@string/lunch" />
 
                 <com.google.android.material.tabs.TabItem
-                    android:text="@string/dinner"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"/>
+                    android:text="@string/dinner" />
 
             </com.google.android.material.tabs.TabLayout>
 
@@ -87,7 +87,7 @@
 
         <TextView
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="wrap_content"
             android:layout_marginBottom="15sp"
             android:text="@string/movedesc"
             android:textColor="@color/black"
@@ -120,7 +120,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:scaleType="centerCrop"
-                        android:src="@drawable/bus"
+                        android:src="@drawable/bus1"
                         android:alpha="10" />
 
                     <LinearLayout
@@ -133,9 +133,9 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:fontFamily="@font/figtreemed"
+                            android:fontFamily="@font/figtreebold"
                             android:text="@string/did_you_know"
-                            android:textColor="@color/grayG"
+                            android:textColor="@color/mintgreen"
                             android:textSize="14sp" />
 
                         <TextView
@@ -175,7 +175,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:scaleType="centerCrop"
-                        android:src="@drawable/bus"
+                        android:src="@drawable/walking"
                         android:alpha="10" />
 
                     <LinearLayout
@@ -189,10 +189,10 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/did_you_know"
-                            android:textColor="@color/grayG"
+                            android:textColor="@color/mintgreen"
                             android:textStyle="bold"
                             android:textSize="14sp"
-                            android:fontFamily="@font/figtree"/>
+                            android:fontFamily="@font/figtreebold"/>
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -243,7 +243,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/did_you_know"
-                            android:textColor="@color/grayG"
+                            android:textColor="@color/mintgreen"
                             android:textStyle="bold"
                             android:textSize="14sp"
                             android:fontFamily="@font/figtree"/>

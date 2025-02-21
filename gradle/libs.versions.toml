@@ -23,6 +23,7 @@ imageLabelingCommon = "18.1.0"
 imageLabelingDefaultCommon = "17.0.0"
 playServicesLocation = "21.3.0"
 firebaseStorage = "21.0.1"
+firebaseMessaging = "24.1.0"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -47,6 +48,7 @@ play-services-auth = { module = "com.google.android.gms:play-services-auth", ver
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 mlkit-image-labeling = { module = "com.google.mlkit:image-labeling", version.ref = "mlkit-image-labeling" }
 firebase-storage = { group = "com.google.firebase", name = "firebase-storage", version.ref = "firebaseStorage" }
+firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging", version.ref = "firebaseMessaging" }
 
 
 [plugins]

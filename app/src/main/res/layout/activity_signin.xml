@@ -22,6 +22,16 @@
         android:orientation="vertical"
         android:layout_centerInParent="true">
 
+
+    <LinearLayout
+        android:id="@+id/login"
+        android:layout_width="335dp"
+        android:layout_height="190dp"
+        android:layout_marginTop="50dp"
+        android:background="@drawable/regbg"
+        android:gravity="center"
+        android:orientation="vertical">
+
         <!-- Email Label and Input -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="326dp"
@@ -47,7 +57,6 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="326dp"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
             app:passwordToggleEnabled="true"
             app:passwordToggleTint="@color/Green"
             app:hintTextColor="@color/Green"
@@ -73,22 +82,21 @@
 
             <Button
                 android:id="@+id/btn_forgot_password"
-                android:layout_width="154dp"
+                android:layout_width="182dp"
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginStart="201dp"
-                android:layout_marginTop="1dp"
-                android:layout_marginBottom="35dp"
+                android:layout_marginStart="144dp"
                 android:background="@android:color/transparent"
                 android:fontFamily="@font/afacad"
                 android:padding="0dp"
                 android:text="@string/forgotpassword"
-                android:textColor="@color/YGreen"
+                android:textColor="@color/Green"
                 android:textSize="16sp"
                 android:textStyle="italic" />
 
         </RelativeLayout>
+    </LinearLayout>
 
         <!-- ProgressBar -->
         <ProgressBar
@@ -104,10 +112,12 @@
             android:layout_width="258dp"
             android:layout_height="wrap_content"
             android:layout_marginBottom="15dp"
-            android:background="@drawable/btnlogin"
+            android:layout_marginTop="35dp"
+            android:fontFamily="@font/poppins_semibold"
+            android:background="@drawable/btn1"
             android:padding="12dp"
             android:text="@string/login"
-            android:textColor="@color/YGreen" />
+            android:textColor="@color/Green" />
 
         <!-- Register Text -->
         <TextView
@@ -115,26 +125,30 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
-            android:fontFamily="@font/afacad"
+            android:fontFamily="@font/poppins_italic"
             android:text="@string/reg"
             android:textColor="@color/LBrown"
-            android:textSize="20sp"
-            android:textStyle="italic"
+            android:textSize="15sp"
             android:clickable="true"
             android:focusable="true" />
 
         <!-- Google Sign-In Button -->
         <Button
             android:id="@+id/google_sign_in_btn"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
             android:background="@drawable/google"
             android:contentDescription="@string/google_sign_in"
             android:drawablePadding="10dp"
-            android:layout_marginTop="100dp"
+            android:layout_marginTop="70dp"
             android:gravity="center"
             android:padding="5dp"
             android:textColor="@color/YGreen" />
 
     </LinearLayout>
+
+    <androidx.constraintlayout.widget.Barrier
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="top" />
 </RelativeLayout>

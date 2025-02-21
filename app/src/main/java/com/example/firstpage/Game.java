@@ -15,7 +15,8 @@ public class Game extends AppCompatActivity {
         setContentView(R.layout.activity_game);
 
         // Find the Play button in the layout
-        Button playButton = findViewById(R.id.playButton);
+        Button playButton = findViewById(R.id.playButton1);
+        Button playButton2 = findViewById(R.id.playButton2);
 
         // Set an OnClickListener for the Play button
         playButton.setOnClickListener(new View.OnClickListener() {
@@ -23,6 +24,15 @@ public class Game extends AppCompatActivity {
             public void onClick(View v) {
                 // Navigate to GameView activity
                 Intent intent = new Intent(Game.this, Game1Tut.class);
+                startActivity(intent);
+            }
+        });
+
+        playButton2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Navigate to GameView activity
+                Intent intent = new Intent(Game.this, DragGame.class);
                 startActivity(intent);
             }
         });

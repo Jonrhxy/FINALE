@@ -1,0 +1,8 @@
+<!-- res/drawable/q3choices.xml -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="#90E9E5D6" /> <!-- White background for the button -->
+    <corners android:radius="8dp" /> <!-- Rounded corners (optional) -->
+    <stroke
+        android:color="@color/Green"
+        android:width="2dp" />
+</shape>

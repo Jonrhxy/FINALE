@@ -27,21 +27,36 @@ import java.util.Map;
 public class Bfast1Fragment extends AppCompatActivity {
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final int REQUEST_IMAGE_PICK = 2;
+
     private ImageView imageView;
     private TextView resultText;
     private Bitmap imageBitmap;
 
-    private static final Map<String, Double> foodCO2Map = new HashMap<>();
+    // Food CO2 Emissions Mapping
+    private static final Map<String, Float> foodCO2Map = new HashMap<>();
 
     static {
-        foodCO2Map.put("beef", 27.0);
-        foodCO2Map.put("chicken", 6.9);
-        foodCO2Map.put("pork", 7.6);
-        foodCO2Map.put("rice", 4.5);
-        foodCO2Map.put("vegetable", 2.0);
-        foodCO2Map.put("fruit", 1.1);
-        foodCO2Map.put("cheese", 13.5);
-        foodCO2Map.put("milk", 3.2);
+        foodCO2Map.put("beef", 27.0f);
+        foodCO2Map.put("chicken", 6.9f);
+        foodCO2Map.put("pork", 7.6f);
+        foodCO2Map.put("rice", 4.5f);
+        foodCO2Map.put("vegetable", 2.0f);
+        foodCO2Map.put("fruit", 1.1f);
+        foodCO2Map.put("cheese", 13.5f);
+        foodCO2Map.put("milk", 3.2f);
+
+        // Filipino Meals
+        foodCO2Map.put("adobo", 7.5f);
+        foodCO2Map.put("sinigang", 6.8f);
+        foodCO2Map.put("lechon", 20.0f);
+        foodCO2Map.put("longganisa", 8.5f);
+        foodCO2Map.put("tapsilog", 10.0f);
+        foodCO2Map.put("bulalo", 15.0f);
+        foodCO2Map.put("kare-kare", 9.5f);
+        foodCO2Map.put("sisig", 12.0f);
+        foodCO2Map.put("halo-halo", 3.5f);
+        foodCO2Map.put("pancit", 4.0f);
+        foodCO2Map.put("lumpia", 3.2f);
     }
 
     @Override
@@ -51,7 +66,7 @@ public class Bfast1Fragment extends AppCompatActivity {
 
         Button captureButton = findViewById(R.id.captureButton);
         Button pickImageButton = findViewById(R.id.pickImageButton);
-        imageView = findViewById(R.id.imageView);
+        imageView = findViewById(R.id.imageView1);
         resultText = findViewById(R.id.resultText);
 
         captureButton.setOnClickListener(v -> dispatchTakePictureIntent());
@@ -84,10 +99,10 @@ public class Bfast1Fragment extends AppCompatActivity {
                 } else if (requestCode == REQUEST_IMAGE_PICK) {
                     Uri imageUri = data.getData();
                     if (imageUri != null) {
-                        InputStream imageStream = getContentResolver().openInputStream(imageUri);
-                        if (imageStream != null) {
-                            imageBitmap = BitmapFactory.decodeStream(imageStream);
-                            imageStream.close(); // Close input stream to prevent memory leaks
+                        try (InputStream imageStream = getContentResolver().openInputStream(imageUri)) {
+                            if (imageStream != null) {
+                                imageBitmap = BitmapFactory.decodeStream(imageStream);
+                            }
                         }
                     } else {
                         resultText.setText("Error: Selected image is null.");
@@ -110,7 +125,6 @@ public class Bfast1Fragment extends AppCompatActivity {
         }
     }
 
-
     private void processImage() {
         if (imageBitmap == null) {
             resultText.setText("Error: No image available.");
@@ -120,7 +134,7 @@ public class Bfast1Fragment extends AppCompatActivity {
         InputImage image = InputImage.fromBitmap(imageBitmap, 0);
         com.google.mlkit.vision.label.ImageLabeler labeler =
                 ImageLabeling.getClient(new ImageLabelerOptions.Builder()
-                        .setConfidenceThreshold(0.7f) // Lower confidence threshold
+                        .setConfidenceThreshold(0.6f) // Adjust for better accuracy
                         .build());
 
         labeler.process(image)
@@ -129,26 +143,53 @@ public class Bfast1Fragment extends AppCompatActivity {
     }
 
     private void filterFoodLabels(List<ImageLabel> labels) {
-        boolean foodDetected = false;
+        StringBuilder detectedLabelsText = new StringBuilder("🔍 Detected Labels:\n");
         StringBuilder results = new StringBuilder();
+        boolean foodDetected = false;
+
+        // Rice variations for better matching
+        String[] riceLabels = {"rice", "white rice", "steamed rice", "cooked rice", "boiled rice"};
+        String[] foodKeywords = {"food", "meal", "dish", "cuisine", "snack", "fruit", "vegetable", "drink"};
 
         for (ImageLabel label : labels) {
-            String labelText = label.getText().toLowerCase();
+            String detectedLabel = label.getText().toLowerCase().trim();
+            float confidence = label.getConfidence();
 
-            for (String food : foodCO2Map.keySet()) {
-                if (labelText.contains(food)) { // Use contains() for better matching
+            detectedLabelsText.append("🔹 ").append(label.getText())
+                    .append(" (").append(String.format("%.2f", confidence)).append(")\n");
+
+            for (String foodName : foodCO2Map.keySet()) {
+                if (detectedLabel.contains(foodName) || foodName.contains(detectedLabel)) {
                     foodDetected = true;
-                    double co2Emission = foodCO2Map.get(food);
-                    results.append(label.getText()).append(" (Confidence: ")
-                            .append(label.getConfidence()).append(")\n")
-                            .append("Estimated CO2 Emission: ")
-                            .append(co2Emission).append(" kg CO2/kg\n");
-                    break; // Stop checking once matched
+                    results.append("🍽 Found: ").append(label.getText()).append("\n")
+                            .append("✅ Confidence: ").append(String.format("%.2f", confidence)).append("\n")
+                            .append("🌍 CO₂ Emission: ").append(foodCO2Map.get(foodName)).append(" kg CO₂/kg\n\n");
+                }
+            }
+
+            for (String rice : riceLabels) {
+                if (detectedLabel.contains(rice)) {
+                    foodDetected = true;
+                    results.append("🍚 Found: Rice\n")
+                            .append("✅ Confidence: ").append(String.format("%.2f", confidence)).append("\n")
+                            .append("🌍 CO₂ Emission: ").append(foodCO2Map.get("rice")).append(" kg CO₂/kg\n\n");
+                }
+            }
+
+            for (String keyword : foodKeywords) {
+                if (detectedLabel.contains(keyword)) {
+                    foodDetected = true;
+                    break;
                 }
             }
         }
 
-        resultText.setText(foodDetected ? results.toString() : "No food detected.");
-    }
+        resultText.setText(detectedLabelsText.toString());
 
+        if (foodDetected) {
+            resultText.setText(resultText.getText() + "\n\n🍽 FOOD FOUND! 🌍\n\n" + results);
+        } else {
+            resultText.setText(resultText.getText() + "\n\n🚫 No food detected. Try another image.");
+        }
+    }
 }

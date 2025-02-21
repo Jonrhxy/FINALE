@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,11 +31,11 @@ public class GameFragment extends Fragment {
 
     private TextView tvDate, tvMonthYear, tvStreakCount, tvAttendanceStatus, tvTotalPoints;
     private ImageView ivCheckmark;
-    private int streakCount = 0;  // Variable to store the streak count
+    private Button btnMarkAttendance;
+    private int streakCount = 0;
     private SharedPreferences sharedPreferences;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
-
 
     public GameFragment() {
         // Required empty public constructor
@@ -46,7 +45,6 @@ public class GameFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_game, container, false);
-
     }
 
     @Override
@@ -59,7 +57,9 @@ public class GameFragment extends Fragment {
         tvStreakCount = view.findViewById(R.id.tvStreakCount);
         tvAttendanceStatus = view.findViewById(R.id.tvAttendanceStatus);
         ivCheckmark = view.findViewById(R.id.ivCheckmark);
-        tvTotalPoints = view.findViewById(R.id.TotalP); // TextView for total points
+        tvTotalPoints = view.findViewById(R.id.TotalP);
+
+        btnMarkAttendance = view.findViewById(R.id.btnMarkAttendance);
 
         // Initialize Firebase Auth and Firestore
         mAuth = FirebaseAuth.getInstance();
@@ -79,37 +79,64 @@ public class GameFragment extends Fragment {
         updateDate();
 
         // Set Click Listeners for Buttons
-        view.findViewById(R.id.gameB).setOnClickListener(v -> {
-            if (getActivity() != null) {
-                openActivity(Game.class);  // Start Game activity
-            }
-        });
-        // Set Click Listeners for Buttons
-        view.findViewById(R.id.btn_myRew).setOnClickListener(v -> {
-            if (getActivity() != null) {
-                openActivity(FragmentRewardM.class);  // Start Game activity
-            }
-        });
-
-
-        view.findViewById(R.id.feature2B).setOnClickListener(v -> {
-            if (getActivity() != null) {
-                openActivity(LeaderBoards.class);
-            }
-        });
-
+        view.findViewById(R.id.gameB).setOnClickListener(v -> openActivity(Game.class));
+        view.findViewById(R.id.reward).setOnClickListener(v -> openActivity(FragmentRewardM.class));
+        view.findViewById(R.id.feature2B).setOnClickListener(v -> openActivity(LeaderBoards.class));
         view.findViewById(R.id.quizB).setOnClickListener(v -> replaceFragment(new QuizFrag()));
         view.findViewById(R.id.feature1B).setOnClickListener(v -> replaceFragment(new VideoFrag()));
 
         // Mark attendance button
-        view.findViewById(R.id.btnMarkAttendance).setOnClickListener(this::markAttendance);
-
+        btnMarkAttendance.setOnClickListener(this::markAttendance);
 
         // Check if it's a new day and reset attendance button if necessary
         checkAndResetAttendance(lastMarkedDate);
 
         // Fetch the points for the current user
         fetchAndUpdatePoints();
+    }
+
+    private void markAttendance(View view) {
+        ivCheckmark.setVisibility(View.VISIBLE); // Make the checkmark visible
+        tvAttendanceStatus.setText("Attendance Marked");
+        streakCount++;
+
+        // Update the streak count in UI
+        tvStreakCount.setText(String.format(Locale.getDefault(), "%d - Day Streak", streakCount));
+
+        // Save updated streak count and today's date in SharedPreferences
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt("streakCount", streakCount);
+        editor.putString("lastMarkedDate", getCurrentDate());
+        editor.putBoolean("attendanceMarked", true); // Flag for attendance status
+        editor.apply();
+
+        // Disable the button completely
+        btnMarkAttendance.setEnabled(false);
+        btnMarkAttendance.setAlpha(0.5f);
+    }
+
+    private void checkAndResetAttendance(String lastMarkedDate) {
+        String todayDate = getCurrentDate();
+        boolean attendanceMarked = sharedPreferences.getBoolean("attendanceMarked", false);
+
+        if (todayDate.equals(lastMarkedDate) && attendanceMarked) {
+            // Keep the button disabled if attendance has already been marked today
+            btnMarkAttendance.setEnabled(false);
+            btnMarkAttendance.setAlpha(0.5f);
+            ivCheckmark.setVisibility(View.VISIBLE);
+            tvAttendanceStatus.setText("Attendance Marked");
+        } else {
+            // Enable the button for a new day
+            btnMarkAttendance.setEnabled(true);
+            btnMarkAttendance.setAlpha(1.0f);
+            ivCheckmark.setVisibility(View.GONE);
+            tvAttendanceStatus.setText("");
+
+            // Reset attendance status flag for the new day
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean("attendanceMarked", false);
+            editor.apply();
+        }
     }
 
     private void fetchAndUpdatePoints() {
@@ -122,78 +149,36 @@ public class GameFragment extends Fragment {
 
         DocumentReference gameRef = db.collection("Games").document(username);
         DocumentReference quizRef = db.collection("Quiz").document(username);
+        DocumentReference quizRef2 = db.collection("Quiz2").document(username);
 
-        // Fetch game points
         gameRef.get().addOnSuccessListener(gameSnapshot -> {
-            int gamePoints;
-            if (gameSnapshot.exists() && gameSnapshot.contains("points")) {
-                gamePoints = gameSnapshot.getLong("points").intValue();
-            } else {
-                gamePoints = 0;
-            }
+            int gamePoints = gameSnapshot.exists() && gameSnapshot.contains("highScore") ?
+                    gameSnapshot.getLong("highScore").intValue() : 0;
 
-            // Fetch quiz points
             quizRef.get().addOnSuccessListener(quizSnapshot -> {
-                int quizPoints = 0;
-                if (quizSnapshot.exists() && quizSnapshot.contains("score")) {
-                    quizPoints = quizSnapshot.getLong("score").intValue();
-                }
+                int quizPoints = quizSnapshot.exists() && quizSnapshot.contains("score") ?
+                        quizSnapshot.getLong("score").intValue() : 0;
 
-                // Compute total points
-                int totalPoints = gamePoints + quizPoints;
+                quizRef2.get().addOnSuccessListener(quiz2Snapshot -> {
+                    int quiz2Points = quiz2Snapshot.exists() && quiz2Snapshot.contains("score") ?
+                            quiz2Snapshot.getLong("score").intValue() : 0;
 
-                // Update the UI with the total points
-                tvTotalPoints.setText(String.format(Locale.getDefault(), "Total Points: %d", totalPoints));
+                    // Compute total points
+                    int totalPoints = gamePoints + quizPoints + quiz2Points;
+                    tvTotalPoints.setText(String.format(Locale.getDefault(), "Total Points: %d", totalPoints));
+                }).addOnFailureListener(e -> {
+                    Log.e("GameFragment", "Error fetching quiz points", e);
+                    Toast.makeText(getActivity(), "Error fetching quiz points", Toast.LENGTH_SHORT).show();
+                });
+
             }).addOnFailureListener(e -> {
-                Log.e("GameFragment", "Error fetching quiz points", e);
-                Toast.makeText(getActivity(), "Error fetching quiz points", Toast.LENGTH_SHORT).show();
+                Log.e("GameFragment", "Error fetching game points", e);
+                Toast.makeText(getActivity(), "Error fetching game points", Toast.LENGTH_SHORT).show();
             });
-
-        }).addOnFailureListener(e -> {
-            Log.e("GameFragment", "Error fetching game points", e);
-            Toast.makeText(getActivity(), "Error fetching game points", Toast.LENGTH_SHORT).show();
         });
     }
 
-
-    private void markAttendance(View view) {
-        // Show the checkmark icon to indicate attendance has been marked
-        ivCheckmark.setVisibility(View.VISIBLE); // Make the checkmark visible
-
-        // Update the status text
-        tvAttendanceStatus.setText("Attendance Marked");
-
-        // Increment the streak count
-        streakCount++;
-
-        // Update the streak count in the UI
-        tvStreakCount.setText(String.format(Locale.getDefault(), "%d - Day Streak", streakCount));
-
-        // Save the updated streak count and today's date in SharedPreferences
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putInt("streakCount", streakCount);
-        editor.putString("lastMarkedDate", getCurrentDate());
-        editor.apply();
-
-        // Disable the button or set low opacity
-        Button btnMarkAttendance = getView().findViewById(R.id.btnMarkAttendance);
-        btnMarkAttendance.setEnabled(false);  // Disable the button
-        btnMarkAttendance.setAlpha(0.5f);    // Set low opacity
-    }
-
-    private void checkAndResetAttendance(String lastMarkedDate) {
-        // If the last marked date is not today's date, reset the attendance button
-        if (!getCurrentDate().equals(lastMarkedDate)) {
-            Button btnMarkAttendance = getView().findViewById(R.id.btnMarkAttendance);
-            btnMarkAttendance.setEnabled(true);  // Enable the button
-            btnMarkAttendance.setAlpha(1.0f);   // Restore full opacity
-            ivCheckmark.setVisibility(View.GONE);  // Hide the checkmark
-            tvAttendanceStatus.setText("");  // Clear attendance status
-        }
-    }
-
     private String getCurrentDate() {
-        // Get the current date in a format (e.g., "dd/MM/yyyy")
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
         return dateFormat.format(Calendar.getInstance().getTime());
     }

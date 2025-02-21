@@ -17,6 +17,7 @@ public class InProgressFragment extends Fragment {
 
     private Button btnStartChallenge1;
     private Button btnStartChallenge2;
+    private Button btnStartChallenge3;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -41,6 +42,15 @@ public class InProgressFragment extends Fragment {
             Intent intent = new Intent(requireActivity(), Chall1.class);
             startActivity(intent);
         });
+
+        btnStartChallenge3 = view.findViewById(R.id.btnStartChallenge3);
+
+        // Set the click listener
+        btnStartChallenge3.setOnClickListener(v -> {
+            Intent intent = new Intent(requireActivity(), Chall3.class);
+            startActivity(intent);
+        });
+
 
         return view;
     }

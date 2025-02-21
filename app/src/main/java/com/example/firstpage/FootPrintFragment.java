@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
@@ -235,20 +236,25 @@ public class FootPrintFragment extends Fragment {
 
         int gaugeColor;
         String centerText;
+        int emotionDrawable;
+
         if (totalEmission < 1) {
             gaugeColor = Color.parseColor(GREEN);
             centerText = "HAPPY\nCHARACTER";
+            emotionDrawable = R.drawable.happy_face;
         } else if (totalEmission < 5) {
             gaugeColor = Color.parseColor(YELLOW);
             centerText = "POKER\nCHARACTER";
+            emotionDrawable = R.drawable.poker_face;
         } else {
             gaugeColor = Color.parseColor(RED);
             centerText = "SAD\nCHARACTER";
+            emotionDrawable = R.drawable.sad_face;
         }
 
-        // SINGLE slice with total
+        // Update PieChart
         List<PieEntry> entries = new ArrayList<>();
-        entries.add(new PieEntry((float) totalEmission, "")); // no label
+        entries.add(new PieEntry((float) totalEmission, ""));
 
         PieDataSet dataSet = new PieDataSet(entries, "");
         dataSet.setColor(gaugeColor);
@@ -260,7 +266,12 @@ public class FootPrintFragment extends Fragment {
         pieChart.setData(pieData);
         pieChart.setCenterText(centerText);
         pieChart.invalidate();
+
+        // Update the emotion face
+        ImageView emotionImage = getView().findViewById(R.id.emotionImage);
+        emotionImage.setImageResource(emotionDrawable);
     }
+
 
     /**
      * Fetch BarChart data from Firestore and update the bar chart + bottom bars.

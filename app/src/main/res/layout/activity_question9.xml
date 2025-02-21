@@ -99,7 +99,7 @@
         <RadioButton
             android:id="@+id/btnNvr"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="52dp"
             android:layout_marginTop="2dp"
             android:background="@drawable/q3choices"
             android:fontFamily="@font/poppinsregular"
@@ -111,7 +111,7 @@
         <RadioButton
             android:id="@+id/btnRare"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="52dp"
             android:layout_marginTop="12dp"
             android:background="@drawable/q3choices"
             android:fontFamily="@font/poppinsregular"
@@ -123,7 +123,7 @@
         <RadioButton
             android:id="@+id/btnSmts"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="52dp"
             android:layout_marginTop="12dp"
             android:background="@drawable/q3choices"
             android:fontFamily="@font/poppinsregular"
@@ -135,7 +135,7 @@
         <RadioButton
             android:id="@+id/btnOftn"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="52dp"
             android:layout_marginTop="12dp"
             android:background="@drawable/q3choices"
             android:fontFamily="@font/poppinsregular"
@@ -147,7 +147,7 @@
         <RadioButton
             android:id="@+id/btnAlwys"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="52dp"
             android:layout_marginTop="12dp"
             android:background="@drawable/q3choices"
             android:fontFamily="@font/poppinsregular"

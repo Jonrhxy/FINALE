@@ -38,12 +38,45 @@
                 android:textSize="14sp" />
         </LinearLayout>
 
-        <!-- Coupon Image -->
-        <ImageView
-            android:id="@+id/masugrew10per"
-            android:layout_width="450dp"
-            android:layout_height="450dp"
-            android:src="@drawable/masug5per" />
+        <!-- QR CODE -->
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/playm10per"
+                android:layout_width="450dp"
+                android:layout_height="450dp"
+                android:src="@drawable/wani5per"
+                android:layout_gravity="center"/>
+
+            <!-- Overlapping LinearLayout -->
+            <LinearLayout
+                android:id="@+id/qr_wani1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_gravity="center_horizontal|bottom"
+                android:layout_marginBottom="28dp">
+
+                <ImageView
+                    android:id="@+id/qr_wanirew10"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:src="@drawable/qrsample"/>
+
+                <TextView
+                    android:id="@+id/waniexp1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="9dp"
+                    android:layout_gravity="center_horizontal|bottom"
+                    android:fontFamily="@font/poppinsregular"
+                    android:textColor="@color/YGreen"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </FrameLayout>
 
         <!-- Bottom Content -->
         <LinearLayout
@@ -60,7 +93,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
                 android:gravity="center"
-                android:text="@string/enjoy"iy
+                android:text="@string/enjoy"
                 android:textColor="@color/black"
                 android:textSize="14sp"
                 android:textStyle="bold" />

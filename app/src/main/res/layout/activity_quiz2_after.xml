@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- Background Image -->
+    <ImageView
+        android:id="@+id/WTGbg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:src="@color/LTGreen" />
+
+    <!-- Logo -->
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="212dp"
+        android:layout_height="212dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="85dp"
+        app:srcCompat="@drawable/final_logo" />
+
+    <!-- Welcome Text -->
+    <TextView
+        android:id="@+id/wtg"
+        android:layout_width="wrap_content"
+        android:layout_height="68dp"
+        android:layout_below="@id/logo"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="1dp"
+        android:fontFamily="@font/poppinsregular"
+        android:gravity="center"
+        android:text="@string/WD"
+        android:textColor="#000000"
+        android:textSize="50sp"
+        android:textStyle="bold" />
+
+    <!-- Total Carbon Text -->
+    <TextView
+        android:id="@+id/finalscore_q2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/wtg"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="9dp"
+        android:text="@string/qzscore"
+        android:textColor="#000000"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <!-- Total Carbon Value -->
+    <TextView
+        android:id="@+id/q2score"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/finalscore_q2"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="18dp"
+        android:gravity="center"
+        android:text="@string/totalquiz1"
+        android:textColor="#4CAF50"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+
+    <!-- Additional Note -->
+
+
+    <!-- Next Button -->
+    <TextView
+        android:id="@+id/wtgm"
+        android:layout_width="379dp"
+        android:layout_height="116dp"
+        android:layout_below="@id/q2score"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="6dp"
+        android:layout_marginTop="36dp"
+        android:fontFamily="@font/afacad"
+        android:gravity="center"
+        android:text="@string/qznote"
+        android:textAlignment="center"
+        android:textColor="#000000"
+        android:textSize="22sp" />
+
+    <Button
+        android:id="@+id/btnq2done"
+        android:layout_width="231dp"
+        android:layout_height="59dp"
+        android:layout_below="@id/wtgm"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="52dp"
+        android:background="@drawable/calculate"
+        android:fontFamily="@font/afacad"
+        android:text="@string/done"
+        android:textAllCaps="false"
+        android:textColor="@color/Brown"
+        android:textSize="18sp"
+        android:focusable="true"
+        android:focusableInTouchMode="true" />
+
+</RelativeLayout>

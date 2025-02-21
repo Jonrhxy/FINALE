@@ -2,10 +2,18 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+
+
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
@@ -23,7 +31,17 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Firstpage"
         tools:targetApi="34">
+        <service android:name=".TrackingService"/>
 
+        <activity
+            android:name=".Winner"
+            android:exported="false" />
+        <activity
+            android:name=".GOver"
+            android:exported="false" />
+        <activity
+            android:name=".DragGame"
+            android:exported="false" />
         <activity
             android:name=".RewWani5per"
             android:exported="false" />

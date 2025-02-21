@@ -97,12 +97,29 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Gauge: Half-donut PieChart -->
-        <com.github.mikephil.charting.charts.PieChart
-            android:id="@+id/pieChart"
+
+        <!-- Gauge: Half-donut PieChart with emoji at the center -->
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="300dp"
-            android:layout_marginTop="8dp"/>
+            android:layout_marginTop="8dp">
+
+            <!-- PieChart -->
+            <com.github.mikephil.charting.charts.PieChart
+                android:id="@+id/pieChart"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+
+            <!-- Emoji (Centered inside PieChart) -->
+            <ImageView
+                android:id="@+id/emotionImage"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_gravity="center"
+                android:src="@drawable/happy_face"/>
+        </FrameLayout>
+
+
 
         <!-- Bottom row: Food and Transportation horizontal bars (kept as is) -->
         <LinearLayout

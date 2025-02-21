@@ -5,7 +5,6 @@ plugins {
 }
 
 android {
-
     namespace = "com.example.firstpage"
     compileSdk = 35
 
@@ -19,8 +18,6 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-
-
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -30,56 +27,60 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
 
-
-    dependencies {
-        implementation(libs.appcompat)
-        implementation(libs.material)
-        implementation(libs.activity)
-        implementation(libs.constraintlayout)
-        implementation(libs.firebase.auth)
-        implementation(libs.firebase.firestore)
-        implementation(libs.recyclerview)
-        implementation(libs.core.ktx)
-        implementation(libs.material3.android)
-        testImplementation(libs.junit)
-        androidTestImplementation(libs.ext.junit)
-        androidTestImplementation(libs.espresso.core)
-        implementation(libs.cardview)
-        implementation("com.google.android.material:material:1.9.0")
-
-        // Firebase and Play Services dependencies
-        implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
-        implementation("com.google.firebase:firebase-database")
-        implementation("com.google.android.gms:play-services-auth:21.2.0")
-
-        // ML Kit Dependencies
-        implementation(libs.vision.common)
-        implementation(libs.image.labeling.common)
-        implementation(libs.image.labeling.default.common)
-        implementation(libs.play.services.location)
-        implementation(libs.mlkit.image.labeling)
-        implementation(libs.firebase.storage)
-
-        // MPAndroidChart for PieChart
-        implementation("com.github.PhilJay:MPAndroidChart:3.1.0")
+    packagingOptions {
+        resources {
+            excludes += listOf("META-INF/NOTICE.md", "META-INF/LICENSE.md")
+        }
     }
 }
+
 dependencies {
+    // Core dependencies
     implementation(libs.appcompat)
-    implementation(libs.material) // Ensure `libs.material` points to version 1.9.0 or your preferred version.
+    implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
-    implementation(libs.firebase.auth)
-    implementation(libs.firebase.firestore)
+    implementation(libs.recyclerview)
+    implementation(libs.cardview)
+    implementation("com.google.android.material:material:1.11.0")
+
+    // Firebase dependencies
+    implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-database")
+    implementation("com.google.firebase:firebase-messaging")
+    implementation("com.google.firebase:firebase-storage")
+
+    // Play Services
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
+    implementation(libs.play.services.location)
+
+    // ML Kit
+    implementation(libs.vision.common)
+    implementation(libs.image.labeling.common)
+    implementation(libs.image.labeling.default.common)
+    implementation("com.google.mlkit:image-labeling:17.0.7")
+
+    // ZXing for QR code scanning
+    implementation("com.google.zxing:core:3.5.1")
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
+
+    // JavaMail API for email sending
+    implementation("com.sun.mail:android-mail:1.6.7")
+    implementation("com.sun.mail:android-activation:1.6.7")
+
+    // Charting Library
+    implementation("com.github.PhilJay:MPAndroidChart:3.1.0")
+
+    // Testing dependencies
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
-    implementation ("com.google.android.material:material:1.11.0")
 }
-
-
