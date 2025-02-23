@@ -1,17 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+
+    android:paddingBottom="64dp"
+    android:clipToPadding="false"
+
     android:background="@color/gamebg">
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
-        android:layout_marginBottom="50dp"
-        android:orientation="vertical"
-        android:padding="16dp">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="40dp"
+    android:layout_marginBottom="50dp"
+    android:orientation="vertical"
+    android:padding="16dp">
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -71,312 +77,295 @@
                 android:text="@string/myrwrd"
                 android:textColor="@color/black"
                 android:textSize="14sp" />
-
         </LinearLayout>
-        </LinearLayout>
+    </LinearLayout>
 
-        <!-- Calendar Section -->
-        <androidx.cardview.widget.CardView
+    <!-- Calendar Section -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:radius="16dp"
+        android:backgroundTint="@color/green"
+        android:elevation="4dp"
+        android:padding="16dp" />
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="4dp" />
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="4dp" />
+
+    <!-- Calendar Section -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:radius="16dp"
+        android:backgroundTint="@color/green"
+        android:elevation="4dp"
+        android:padding="16dp" />
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="4dp" />
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="4dp" />
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="4dp">
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:radius="16dp"
-            android:backgroundTint="@color/green"
-            android:elevation="4dp"
-            android:padding="16dp"/>
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:background="@drawable/rounded_background">
 
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="4dp"/>
+            <!-- Date Display -->
+            <TextView
+                android:id="@+id/tvDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/daytoday"
+                android:textSize="24sp"
+                android:textColor="@color/homepagebg"
+                android:fontFamily="@font/poppins_semibold_italic"
+                android:textStyle="bold" />
 
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="4dp"/>
+            <TextView
+                android:id="@+id/tvMonthYear"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/datetoday"
+                android:fontFamily="@font/poppinsregular"
+                android:textSize="14sp"
+                android:textColor="@color/homepagebg" />
 
-        <!-- Calendar Section -->
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:radius="16dp"
-            android:backgroundTint="@color/green"
-            android:elevation="4dp"
-            android:padding="16dp"/>
+            <!-- Streak Status -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="8dp">
 
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="4dp"/>
+                <!-- Fire Icon -->
+                <ImageView
+                    android:id="@+id/ivFireIcon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/streak"
+                    android:contentDescription="@string/streak" />
 
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="4dp"/>
+                <TextView
+                    android:id="@+id/tvStreakCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/totalstreak"
+                    android:fontFamily="@font/poppinsmedium"
+                    android:textSize="16sp"
+                    android:textColor="@color/homepagebg"
+                    android:layout_marginStart="4dp" />
+            </LinearLayout>
 
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="4dp">
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1.5dp"
+                android:background="@color/homepagebg"
+                android:layout_marginTop="8dp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp"
-                android:background="@drawable/rounded_background">
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginTop="8dp">
 
-                <!-- Date Display -->
+                <ImageView
+                    android:id="@+id/ivCheckmark"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/check"
+                    android:contentDescription="@string/checkedAtten"
+                    app:tint="@color/LGreen"
+                    android:visibility="gone" />
+
                 <TextView
-                    android:id="@+id/tvDate"
+                    android:id="@+id/tvAttendanceStatus"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/daytoday"
-                    android:textSize="24sp"
+                    android:text="@string/checkingAtten"
                     android:textColor="@color/homepagebg"
-                    android:fontFamily="@font/poppins_semibold_italic"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/tvMonthYear"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/datetoday"
                     android:fontFamily="@font/poppinsregular"
-                    android:textSize="14sp"
-                    android:textColor="@color/homepagebg" />
+                    android:textSize="14sp" />
 
-                <!-- Streak Status -->
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <Button
+                    android:id="@+id/btnMarkAttendance"
+                    android:layout_width="129dp"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginTop="8dp">
-
-                    <!-- Fire Icon -->
-                    <ImageView
-                        android:id="@+id/ivFireIcon"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/streak"
-                        android:contentDescription="@string/streak" />
-
-                    <!-- Streak Count -->
-                    <TextView
-                        android:id="@+id/tvStreakCount"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/totalstreak"
-                        android:fontFamily="@font/poppinsmedium"
-                        android:textSize="16sp"
-                        android:textColor="@color/homepagebg"
-                        android:layout_marginStart="4dp" />
-                </LinearLayout>
-
-                <!-- Divider Line -->
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1.5dp"
-                    android:background="@color/homepagebg"
-                    android:layout_marginTop="8dp" />
-
-                <!-- Attendance Status -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center"
-                    android:layout_marginTop="8dp">
-
-                    <!-- Checkmark Icon -->
-                    <ImageView
-                        android:id="@+id/ivCheckmark"
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@drawable/check"
-                        android:contentDescription="@string/checkedAtten"
-                        app:tint="@color/LGreen"
-                        android:visibility="gone" /> <!-- Initially hidden -->
-
-                    <!-- Status Text -->
-
-                    <!-- Attendance Button -->
-                    <TextView
-                        android:id="@+id/tvAttendanceStatus"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/checkingAtten"
-                        android:textColor="@color/homepagebg"
-                        android:fontFamily="@font/poppinsregular"
-                        android:textSize="14sp" />
-
-                    <Button
-                        android:id="@+id/btnMarkAttendance"
-                        android:layout_width="129dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:background="@drawable/btnatten1"
-                        android:fontFamily="@font/poppinsmedium"
-                        android:onClick="markAttendance"
-                        android:text="@string/attendance"
-                        android:textColor="@color/grayG" />
-                </LinearLayout>
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/btnatten1"
+                    android:fontFamily="@font/poppinsmedium"
+                    android:onClick="markAttendance"
+                    android:text="@string/attendance"
+                    android:textColor="@color/grayG" />
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/poppins_semibold"
+        android:layout_marginStart="12dp"
+        android:text="@string/Categories"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="@color/grayG"
+        android:layout_marginTop="46dp" />
 
-        <!-- Categories -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/poppins_semibold"
-            android:layout_marginStart="12dp"
-            android:text="@string/Categories"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="@color/grayG"
-            android:layout_marginTop="46dp" />
+    <GridLayout
+        android:layout_width="350dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:layout_gravity="center_horizontal"
+        android:columnCount="2"
+        android:padding="8dp"
+        android:rowCount="2">
 
-        <GridLayout
-            android:layout_width="350dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:layout_gravity="center_horizontal"
-            android:columnCount="2"
-            android:padding="8dp"
-            android:rowCount="2">
+        <LinearLayout
+            android:id="@+id/gameB"
+            android:layout_width="142dp"
+            android:layout_height="100dp"
+            android:layout_marginStart="5dp"
+            android:background="@drawable/btn1"
+            android:elevation="4dp"
+            android:gravity="center"
+            android:orientation="vertical">
 
-                <LinearLayout
-                    android:id="@+id/gameB"
-                    android:layout_width="142dp"
-                    android:layout_height="100dp"
-                    android:layout_marginStart="5dp"
-                    android:background="@drawable/btn1"
-                    android:elevation="4dp"
-                    android:gravity="center"
-                    android:orientation="vertical">
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:contentDescription="@string/MasugidIcon"
+                android:src="@drawable/gameb"
+                app:tint="@color/DarkG"/>
 
-                    <ImageView
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:contentDescription="@string/MasugidIcon"
-                        android:src="@drawable/gameb"
-                        app:tint="@color/DarkG"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:layout_gravity="center"
+                android:fontFamily="@font/poppins_semibold"
+                android:text="@string/games"
+                android:textColor="@color/grayG"
+                android:textSize="13sp" />
+        </LinearLayout>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
-                        android:layout_gravity="center"
-                        android:fontFamily="@font/poppins_semibold"
-                        android:text="@string/games"
-                        android:textColor="@color/grayG"
-                        android:textSize="13sp" />
-                </LinearLayout>
+        <LinearLayout
+            android:id="@+id/quizB"
+            android:layout_width="142dp"
+            android:layout_height="100dp"
+            android:layout_marginStart="40dp"
+            android:background="@drawable/btn1"
+            android:elevation="4dp"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="16dp">
 
-            <!-- Quiz Rectangle (Right) -->
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:contentDescription="@string/MasugidIcon"
+                android:src="@drawable/quiz"
+                app:tint="@color/DarkG"/>
 
-                <LinearLayout
-                    android:id="@+id/quizB"
-                    android:layout_width="142dp"
-                    android:layout_height="100dp"
-                    android:layout_marginStart="40dp"
-                    android:background="@drawable/btn1"
-                    android:elevation="4dp"
-                    android:gravity="center"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="5dp"
+                android:fontFamily="@font/poppins_semibold"
+                android:text="@string/quiz"
+                android:textColor="@color/grayG"
+                android:textSize="12sp" />
+        </LinearLayout>
 
-                    <ImageView
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:contentDescription="@string/MasugidIcon"
-                        android:src="@drawable/quiz"
-                        app:tint="@color/DarkG"/>
+        <LinearLayout
+            android:id="@+id/feature1B"
+            android:layout_width="142dp"
+            android:layout_height="100dp"
+            android:layout_marginTop="25dp"
+            android:layout_marginStart="5dp"
+            android:background="@drawable/btn1"
+            android:elevation="4dp"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="16dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_marginTop="5dp"
-                        android:fontFamily="@font/poppins_semibold"
-                        android:text="@string/quiz"
-                        android:textColor="@color/grayG"
-                        android:textSize="12sp" />
-                </LinearLayout>
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/vid"
+                app:tint="@color/DarkG"/>
 
-            <!-- New Feature 1 (Bottom Left) -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="5dp"
+                android:fontFamily="@font/poppins_semibold"
+                android:text="@string/video"
+                android:textColor="@color/grayG"
+                android:textSize="12sp" />
+        </LinearLayout>
 
-                s<LinearLayout
-                    android:id="@+id/feature1B"
-                    android:layout_width="142dp"
-                    android:layout_height="100dp"
-                    android:layout_marginTop="25dp"
-                    android:layout_marginStart="5dp"
-                    android:background="@drawable/btn1"
-                    android:elevation="4dp"
-                    android:gravity="center"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+        <LinearLayout
+            android:id="@+id/feature2B"
+            android:layout_width="142dp"
+            android:layout_height="100dp"
+            android:layout_marginTop="25dp"
+            android:layout_marginStart="40dp"
+            android:background="@drawable/btn1"
+            android:elevation="4dp"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="16dp">
 
-                    <ImageView
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:src="@drawable/vid"
-                        app:tint="@color/DarkG"/>
+            <ImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:src="@drawable/leaderb"
+                app:tint="@color/grayG"/>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_marginTop="5dp"
-                        android:fontFamily="@font/poppins_semibold"
-                        android:text="@string/video"
-                        android:textColor="@color/grayG"
-                        android:textSize="12sp" />
-                </LinearLayout>
-
-            <!-- New Feature 2 (Bottom Right) -->
-
-                <LinearLayout
-                    android:id="@+id/feature2B"
-                    android:layout_width="142dp"
-                    android:layout_height="100dp"
-                    android:layout_marginTop="25dp"
-                    android:layout_marginStart="40dp"
-                    android:background="@drawable/btn1"
-                    android:elevation="4dp"
-                    android:gravity="center"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <ImageView
-                        android:layout_width="50dp"
-                        android:layout_height="50dp"
-                        android:src="@drawable/leaderb"
-                        app:tint="@color/grayG"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_marginTop="5dp"
-                        android:fontFamily="@font/poppins_semibold"
-                        android:text="@string/leadersh"
-                        android:textColor="@color/DarkG"
-                        android:textSize="12sp" />
-                </LinearLayout>
-
-        </GridLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="5dp"
+                android:fontFamily="@font/poppins_semibold"
+                android:text="@string/leadersh"
+                android:textColor="@color/DarkG"
+                android:textSize="12sp" />
+        </LinearLayout>
+    </GridLayout>
     </LinearLayout>
 </ScrollView>

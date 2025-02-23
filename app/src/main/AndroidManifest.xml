@@ -32,10 +32,14 @@
         android:theme="@style/Theme.Firstpage"
         tools:targetApi="34">
         <service android:name=".TrackingService"/>
-
         <activity
             android:name=".Winner"
             android:exported="false" />
+        <activity
+            android:name=".BattleEcoActivity"
+            android:exported="false"
+            android:screenOrientation="landscape"
+            android:configChanges="orientation|screenSize"/>
         <activity
             android:name=".GOver"
             android:exported="false" />

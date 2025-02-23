@@ -10,32 +10,43 @@ import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.provider.Settings;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import android.os.Handler;
+import android.os.Looper;
 
 public class Transportation extends AppCompatActivity {
     private SharedPreferences sharedPreferences;
     private TextView distanceTextView, carbonTextView, travelModeTextView;
-    private Button resetButton;
     private static final int LOCATION_PERMISSION_REQUEST = 1000;
     private int totalDistance = 0;
     private int totalCarbon = 0;
     private String selectedMode = "Car";
+    private FirebaseFirestore db;
+    private FirebaseUser user;
+    private DocumentReference dailyDocRef;
 
+    // Local broadcast receiver for updates from TrackingService
     private final BroadcastReceiver trackingReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             totalDistance = intent.getIntExtra("total_distance", 0);
             totalCarbon = intent.getIntExtra("total_carbon", 0);
             selectedMode = intent.getStringExtra("travel_mode");
-            updateUI();
+            updateUI(totalDistance, totalCarbon, selectedMode);
         }
     };
 
@@ -47,22 +58,50 @@ public class Transportation extends AppCompatActivity {
         distanceTextView = findViewById(R.id.textViewDistance);
         carbonTextView = findViewById(R.id.textViewCarbon);
         travelModeTextView = findViewById(R.id.textViewTravelMode);
-        resetButton = findViewById(R.id.resetButton);
 
-        // Use same SharedPreferences name as TrackingService ("TrackingData")
         sharedPreferences = getSharedPreferences("TrackingData", Context.MODE_PRIVATE);
-        totalDistance = (int) sharedPreferences.getFloat("totalDistance", 0);
-        totalCarbon = (int) sharedPreferences.getFloat("totalCarbon", 0);
-        selectedMode = sharedPreferences.getString("selected_mode", "Car");
 
-        updateUI();
+        db = FirebaseFirestore.getInstance();
+        user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            String today = getCurrentDateString();
+            dailyDocRef = db.collection("transportation")
+                    .document(user.getUid())
+                    .collection("daily")
+                    .document(today);
+            listenToFirestoreUpdates();
+        }
+
+        registerReceiver(trackingReceiver, new IntentFilter("TRACKING_UPDATE"));
+
         checkPermissions();
         checkGpsEnabled();
-
-        registerReceiver(trackingReceiver, new IntentFilter("TRACKING_UPDATE"), Context.RECEIVER_NOT_EXPORTED);
         startForegroundTracking();
+    }
 
-        resetButton.setOnClickListener(v -> resetTracking());
+    private void listenToFirestoreUpdates() {
+        if (dailyDocRef != null) {
+            dailyDocRef.addSnapshotListener((DocumentSnapshot snapshot, FirebaseFirestoreException e) -> {
+                if (e != null) {
+                    Toast.makeText(Transportation.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (snapshot != null && snapshot.exists()) {
+                    String carbonStr = snapshot.getString("total_carbon_footprint");
+                    int firestoreCarbon = 0;
+                    if (carbonStr != null && !carbonStr.isEmpty()) {
+                        try {
+                            firestoreCarbon = (int) Double.parseDouble(carbonStr);
+                        } catch (NumberFormatException ex) {
+                            firestoreCarbon = 0;
+                        }
+                    }
+                    carbonTextView.setText("CO₂ Emission: " + firestoreCarbon + " kg");
+                } else {
+                    carbonTextView.setText("CO₂ Emission: 0 kg");
+                }
+            });
+        }
     }
 
     private void checkGpsEnabled() {
@@ -107,30 +146,15 @@ public class Transportation extends AppCompatActivity {
         }
     }
 
-    private void resetTracking() {
-        Intent serviceIntent = new Intent(this, TrackingService.class);
-        stopService(serviceIntent);
-
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.clear();
-        editor.apply();
-
-        distanceTextView.setText("Distance Traveled: 0 m");
-        carbonTextView.setText("CO₂ Emission: 0 kg");
-        travelModeTextView.setText("Mode: Unknown");
-
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            startService(serviceIntent);
-            Intent forceUpdateIntent = new Intent(this, TrackingService.class);
-            forceUpdateIntent.setAction("FORCE_UPDATE");
-            startService(forceUpdateIntent);
-        }, 1000);
-    }
-
-    private void updateUI() {
+    private void updateUI(int totalDistance, int totalCarbon, String selectedMode) {
         distanceTextView.setText("Distance Traveled: " + totalDistance + " meters");
         carbonTextView.setText("CO₂ Emission: " + totalCarbon + " kg");
         travelModeTextView.setText("Mode: " + selectedMode);
+    }
+
+    private String getCurrentDateString() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        return sdf.format(new Date());
     }
 
     @Override

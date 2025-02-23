@@ -7,6 +7,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
@@ -40,10 +42,14 @@ public class FootPrintFragment extends Fragment {
     private TextView emittedValue, reduceValue;
     private TextView foodValue, transportValue;
     private View foodBarFill, transportBarFill;
-
     private PieChart pieChart;
     private BarChart barChart;
     private RadioGroup radioGroupPeriod;
+    // New container for day labels
+    private LinearLayout dayLabelsContainer;
+
+    // Keep a reference to the inflated view
+    private View rootView;
 
     // Color constants
     private static final String DARK_GREEN = "#2E7D32";
@@ -68,25 +74,28 @@ public class FootPrintFragment extends Fragment {
             ViewGroup container,
             Bundle savedInstanceState
     ) {
-        View view = inflater.inflate(R.layout.activity_foot_print_fragment, container, false);
+        // Save the inflated view to a member variable
+        rootView = inflater.inflate(R.layout.activity_foot_print_fragment, container, false);
 
-        // 1. Initialize all Views
-        helloText = view.findViewById(R.id.helloText);
-        emissionText = view.findViewById(R.id.emissionText);
-        noDataText = view.findViewById(R.id.noDataText);
-        detailsDescription = view.findViewById(R.id.detailsDescription);
+        // 1. Initialize all Views using rootView
+        helloText = rootView.findViewById(R.id.helloText);
+        emissionText = rootView.findViewById(R.id.emissionText);
+        noDataText = rootView.findViewById(R.id.noDataText);
+        detailsDescription = rootView.findViewById(R.id.detailsDescription);
 
-        emittedValue = view.findViewById(R.id.emittedValue);
-        reduceValue = view.findViewById(R.id.reduceValue);
+        emittedValue = rootView.findViewById(R.id.emittedValue);
+        reduceValue = rootView.findViewById(R.id.reduceValue);
 
-        foodValue = view.findViewById(R.id.foodValue);
-        transportValue = view.findViewById(R.id.transportValue);
-        foodBarFill = view.findViewById(R.id.foodBarFill);
-        transportBarFill = view.findViewById(R.id.transportBarFill);
+        foodValue = rootView.findViewById(R.id.foodValue);
+        transportValue = rootView.findViewById(R.id.transportValue);
+        foodBarFill = rootView.findViewById(R.id.foodBarFill);
+        transportBarFill = rootView.findViewById(R.id.transportBarFill);
 
-        pieChart = view.findViewById(R.id.pieChart);
-        barChart = view.findViewById(R.id.barChart);
-        radioGroupPeriod = view.findViewById(R.id.radioGroupPeriod);
+        pieChart = rootView.findViewById(R.id.pieChart);
+        barChart = rootView.findViewById(R.id.barChart);
+        radioGroupPeriod = rootView.findViewById(R.id.radioGroupPeriod);
+        // New: initialize the day labels container
+        dayLabelsContainer = rootView.findViewById(R.id.dayLabelsContainer);
 
         // 2. Fetch user data for greeting and daily emission
         fetchUserData();
@@ -100,14 +109,23 @@ public class FootPrintFragment extends Fragment {
         // 4. Fetch Firestore data for the gauge (transportation + food)
         fetchCarbonFootprintData();
 
-        // 5. Setup Week/Month toggle for the BarChart
+        // 5. Setup Week/Month toggle for the BarChart and update day labels accordingly
         radioGroupPeriod.setOnCheckedChangeListener((group, checkedId) -> {
             fetchBarGraphData();
+            updateDayLabels();
         });
-        // By default, fetch data for the BarChart
+        // By default, fetch data for the BarChart and update day labels
         fetchBarGraphData();
+        updateDayLabels();
 
-        return view;
+        return rootView;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // Clear the reference to avoid updating a null view
+        rootView = null;
     }
 
     /**
@@ -194,6 +212,9 @@ public class FootPrintFragment extends Fragment {
 
         Tasks.whenAllSuccess(transTask, foodTask)
                 .addOnSuccessListener(tasks -> {
+                    // Check if fragment is still attached before updating UI
+                    if (!isAdded()) return;
+
                     double tVal = 0.0;
                     double fVal = 0.0;
                     if (tasks.size() >= 2) {
@@ -235,20 +256,16 @@ public class FootPrintFragment extends Fragment {
         Log.d("FootPrintFragment", "Total Emission: " + totalEmission);
 
         int gaugeColor;
-        String centerText;
         int emotionDrawable;
 
         if (totalEmission < 1) {
             gaugeColor = Color.parseColor(GREEN);
-            centerText = "HAPPY\nCHARACTER";
             emotionDrawable = R.drawable.happy_face;
         } else if (totalEmission < 5) {
             gaugeColor = Color.parseColor(YELLOW);
-            centerText = "POKER\nCHARACTER";
             emotionDrawable = R.drawable.poker_face;
         } else {
             gaugeColor = Color.parseColor(RED);
-            centerText = "SAD\nCHARACTER";
             emotionDrawable = R.drawable.sad_face;
         }
 
@@ -264,14 +281,16 @@ public class FootPrintFragment extends Fragment {
 
         PieData pieData = new PieData(dataSet);
         pieChart.setData(pieData);
-        pieChart.setCenterText(centerText);
         pieChart.invalidate();
 
-        // Update the emotion face
-        ImageView emotionImage = getView().findViewById(R.id.emotionImage);
-        emotionImage.setImageResource(emotionDrawable);
+        // Instead of using getView(), use rootView safely
+        if (rootView != null) {
+            ImageView emotionImage = rootView.findViewById(R.id.emotionImage);
+            if (emotionImage != null) {
+                emotionImage.setImageResource(emotionDrawable);
+            }
+        }
     }
-
 
     /**
      * Fetch BarChart data from Firestore and update the bar chart + bottom bars.
@@ -288,6 +307,9 @@ public class FootPrintFragment extends Fragment {
 
         Tasks.whenAllSuccess(transTask, foodTask)
                 .addOnSuccessListener(tasks -> {
+                    // Check if fragment is still attached
+                    if (!isAdded()) return;
+
                     double transportVal = 0;
                     double foodVal = 0;
                     if (tasks.size() >= 2) {
@@ -317,8 +339,10 @@ public class FootPrintFragment extends Fragment {
                 })
                 .addOnFailureListener(e -> {
                     Log.e("FootPrintFragment", "Error fetching bar chart data", e);
-                    noDataText.setVisibility(View.VISIBLE);
-                    barChart.setVisibility(View.GONE);
+                    if (rootView != null) {
+                        noDataText.setVisibility(View.VISIBLE);
+                        barChart.setVisibility(View.GONE);
+                    }
                 });
     }
 
@@ -351,8 +375,12 @@ public class FootPrintFragment extends Fragment {
 
     /**
      * Dynamically fill the bottom horizontal bars (Food, Transport).
+     * Note: This method checks if the fragment is still attached
+     * to avoid IllegalStateException when calling getResources().
      */
     private void updateHorizontalBars(double transport, double food) {
+        if (!isAdded() || rootView == null) return;
+
         double maxCO2 = 100.0; // define a maximum for the bars
 
         float foodFraction = (float) Math.min(food / maxCO2, 1.0);
@@ -365,9 +393,9 @@ public class FootPrintFragment extends Fragment {
         foodValue.setText(food + " CO2");
         transportValue.setText(transport + " CO2");
 
-        // Convert dp to px
+        // Convert dp to px using rootView's resources
         float totalBarWidthDp = 80f;
-        float scale = getResources().getDisplayMetrics().density;
+        float scale = rootView.getResources().getDisplayMetrics().density;
         int foodFillPx = (int) (foodFraction * totalBarWidthDp * scale);
         int transportFillPx = (int) (transportFraction * totalBarWidthDp * scale);
 
@@ -380,6 +408,43 @@ public class FootPrintFragment extends Fragment {
         ViewGroup.LayoutParams transportParams = transportBarFill.getLayoutParams();
         transportParams.width = transportFillPx;
         transportBarFill.setLayoutParams(transportParams);
+    }
+
+    /**
+     * Updates the day (or week) labels below the bar chart.
+     * For the week view, shows "Mon" to "Sun".
+     * For the month view, shows week numbers (e.g. "Week 1"–"Week 4").
+     */
+    private void updateDayLabels() {
+        if (dayLabelsContainer == null || !isAdded()) return;
+        dayLabelsContainer.removeAllViews();
+
+        int selectedId = radioGroupPeriod.getCheckedRadioButtonId();
+        if (selectedId == R.id.radioWeek) {
+            // For week view, create 7 labels for Monday to Sunday.
+            dayLabelsContainer.setWeightSum(7);
+            String[] weekDays = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
+            for (String day : weekDays) {
+                TextView tv = new TextView(getContext());
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1);
+                tv.setLayoutParams(params);
+                tv.setText(day);
+                tv.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+                dayLabelsContainer.addView(tv);
+            }
+        } else {
+            // For month view, assume 4 weeks (adjust as needed).
+            dayLabelsContainer.setWeightSum(4);
+            String[] weeks = {"Week 1", "Week 2", "Week 3", "Week 4"};
+            for (String week : weeks) {
+                TextView tv = new TextView(getContext());
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1);
+                tv.setLayoutParams(params);
+                tv.setText(week);
+                tv.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+                dayLabelsContainer.addView(tv);
+            }
+        }
     }
 
     /**

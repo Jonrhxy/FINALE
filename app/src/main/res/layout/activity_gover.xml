@@ -39,6 +39,7 @@
             android:id="@+id/Drag_BackButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="50dp"
             android:text="@string/back"
             android:textSize="18sp"
             android:padding="10dp"

@@ -123,5 +123,80 @@
                 android:layout_marginTop="16dp" />
         </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/challengeCard4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/card_background"
+            android:padding="16dp"
+            android:layout_marginTop="16dp">
+
+            <TextView
+                android:id="@+id/tvChallengeTitle4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Track Your Distance Travel and Carbon Footprint"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:id="@+id/tvChallengeDescription4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/day2text"
+                android:textSize="14sp"
+                android:textColor="@color/black"
+                android:layout_marginTop="8dp" />
+
+            <Button
+                android:id="@+id/btnStartChallenge4"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/start"
+                android:backgroundTint="@color/BrightGreen"
+                android:textColor="#FFFFFF"
+                android:layout_marginTop="16dp" />
+        </LinearLayout>
+
+
+        <!-- Challenge Card 3 -->
+        <LinearLayout
+            android:id="@+id/challengeCard5"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/card_background"
+            android:padding="16dp"
+            android:layout_marginTop="16dp">
+
+            <TextView
+                android:id="@+id/tvChallengeTitle5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Walking bros"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:id="@+id/tvChallengeDescription5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Walk for atleast 2KM!"
+                android:textSize="14sp"
+                android:textColor="@color/black"
+                android:layout_marginTop="8dp" />
+
+            <Button
+                android:id="@+id/btnStartChallenge5"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/start"
+                android:backgroundTint="@color/BrightGreen"
+                android:textColor="#FFFFFF"
+                android:layout_marginTop="16dp" />
+        </LinearLayout>
     </LinearLayout>
 </ScrollView>

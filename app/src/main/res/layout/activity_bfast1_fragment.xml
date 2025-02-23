@@ -20,7 +20,7 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-        <ImageView
+            <ImageView
                 android:id="@+id/imageView1"
                 android:layout_width="300dp"
                 android:layout_height="300dp"

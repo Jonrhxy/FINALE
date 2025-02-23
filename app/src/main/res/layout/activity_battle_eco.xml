@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/battleEcoRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background1"
+    tools:context=".BattleEcoActivity">
+
+    <!-- Round Counter (top-center) -->
+    <TextView
+        android:id="@+id/roundCounterText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Round: 1 / 25"
+        android:textSize="18sp"
+        android:textColor="@android:color/white"
+        android:gravity="center"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp" />
+
+    <!-- Player Stats (top-left) -->
+    <TextView
+        android:id="@+id/playerHealthText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Health: 100"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp" />
+
+    <TextView
+        android:id="@+id/playerShieldText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Shield: 0"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        app:layout_constraintTop_toBottomOf="@id/playerHealthText"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="4dp"
+        android:layout_marginStart="16dp" />
+
+    <TextView
+        android:id="@+id/playerEnergyText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Energy: 0"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        app:layout_constraintTop_toBottomOf="@id/playerShieldText"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="4dp"
+        android:layout_marginStart="16dp" />
+
+    <!-- AI Stats (top-right) -->
+    <TextView
+        android:id="@+id/computerHealthText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Computer Health: 100"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp" />
+
+    <TextView
+        android:id="@+id/computerShieldText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Shield: 0"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        app:layout_constraintTop_toBottomOf="@id/computerHealthText"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="16dp" />
+
+    <TextView
+        android:id="@+id/computerEnergyText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Energy: 0"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        app:layout_constraintTop_toBottomOf="@id/computerShieldText"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="16dp" />
+
+    <!-- Player Character (center-left) -->
+    <ImageView
+        android:id="@+id/playerCharacterImage"
+        android:layout_width="89dp"
+        android:layout_height="153dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/main_character"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.5" />
+
+
+    <!-- AI Character (center-right) -->
+    <ImageView
+        android:id="@+id/aiCharacterImage"
+        android:layout_width="89dp"
+        android:layout_height="153dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/burger_boss"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintVertical_bias="0.5" />
+
+
+    <!-- Player Deck Preview (left) -->
+    <ImageView
+        android:id="@+id/playerDeckPreview"
+        android:layout_width="60dp"
+        android:layout_height="90dp"
+        android:layout_marginStart="92dp"
+        android:layout_marginTop="96dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/placeholder_card"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- AI Deck Preview (right) -->
+    <ImageView
+        android:id="@+id/aiDeckPreview"
+        android:layout_width="60dp"
+        android:layout_height="90dp"
+        android:layout_marginTop="96dp"
+        android:layout_marginEnd="92dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/placeholder_card"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Player Drawn Card (invisible by default) -->
+    <ImageView
+        android:id="@+id/playerDrawnCard"
+        android:layout_width="160dp"
+        android:layout_height="220dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/placeholder_card"
+        android:visibility="invisible"
+        android:elevation="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="0.3"
+        app:layout_constraintVertical_bias="0.5" />
+
+    <!-- AI Drawn Card (invisible by default) -->
+    <ImageView
+        android:id="@+id/aiDrawnCard"
+        android:layout_width="160dp"
+        android:layout_height="220dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/placeholder_card"
+        android:visibility="invisible"
+        android:elevation="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="0.7"
+        app:layout_constraintVertical_bias="0.5" />
+
+    <!-- Battle Log (bottom center) -->
+    <TextView
+        android:id="@+id/battleLogText"
+        android:layout_width="398dp"
+        android:layout_height="62dp"
+        android:layout_margin="8dp"
+        android:background="#88000000"
+        android:padding="8dp"
+        android:text="Battle log..."
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- Draw Card Button (bottom-left) -->
+    <Button
+        android:id="@+id/playerDrawButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Draw Card"
+        android:textColor="#FFFFFF"
+        android:background="@drawable/green_button"
+        style="?android:attr/buttonStyleSmall"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginBottom="16dp"
+        android:layout_marginStart="16dp" />
+
+    <!-- Hand Layout (above the battle log) -->
+    <LinearLayout
+        android:id="@+id/handLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_margin="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/battleLogText"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- White line box for the RESERVED card -->
+    <LinearLayout
+        android:id="@+id/playerReservedContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/dialog_rounded_shape"
+        android:orientation="vertical"
+        android:padding="8dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="16dp">
+
+        <ImageView
+            android:id="@+id/playerReservedCardImage"
+            android:layout_width="80dp"
+            android:layout_height="120dp"
+            android:src="@drawable/placeholder_card"
+            android:layout_gravity="center" />
+
+        <TextView
+            android:id="@+id/playerReservedLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Reserved Card"
+            android:textColor="@android:color/black"
+            android:layout_marginTop="4dp"
+            android:layout_gravity="center" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
