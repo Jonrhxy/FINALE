@@ -66,13 +66,13 @@ public class FootPrintFragment extends Fragment {
     private static final String YELLOW = "#FFC107";
     private static final String RED = "#F44336";
 
-    // Stored emission values
+    // Stored emission values (raw values from Firestore)
     private double transportEmission = 0;
     private double foodEmission = 0;
 
     private static final String TAG = "FootPrintFragment";
 
-    // The server-based date obtained from Firestore.
+    // Server-based date (to ensure server time is used for queries)
     private Date serverDateObject = null;
 
     public FootPrintFragment() {
@@ -102,12 +102,12 @@ public class FootPrintFragment extends Fragment {
         dayLabelsContainer = rootView.findViewById(R.id.dayLabelsContainer);
 
         fetchUserData();
-        // Initially set reduceValue (this will be updated when Firestore data is fetched)
-        reduceValue.setText("30");
+        // Initialize reduceValue to zero; it will update when Firestore is fetched.
+        reduceValue.setText("0.0");
 
         styleGauge(pieChart);
 
-        // Get the server date from Firestore.
+        // Get the server date from Firestore so that queries use the server's year.
         getServerDateFromFirestore().addOnSuccessListener(date -> {
             if (!isAdded() || rootView == null) return;
             serverDateObject = date;
@@ -158,7 +158,7 @@ public class FootPrintFragment extends Fragment {
     }
 
     /**
-     * Sets up the radio group listeners.
+     * Sets up the radio group listeners to fetch data for Today, Week, or Month.
      */
     private void setupRadioGroup() {
         if (!isAdded() || rootView == null) return;
@@ -176,7 +176,7 @@ public class FootPrintFragment extends Fragment {
     }
 
     /**
-     * Uses Firestore to get the server time.
+     * Uses Firestore to get the server time (via a dummy document write/read).
      */
     private Task<Date> getServerDateFromFirestore() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -194,7 +194,7 @@ public class FootPrintFragment extends Fragment {
     }
 
     /**
-     * Helper method to build a query date string.
+     * Helper method to build a query date string using the server's year.
      */
     private String buildQueryDate(Date selectedDate) {
         if (serverDateObject == null || selectedDate == null) {
@@ -208,7 +208,8 @@ public class FootPrintFragment extends Fragment {
     }
 
     /**
-     * Fetch today's total CO₂ emission using the query date built from the server date.
+     * Fetch today's emission data from Firestore and calculate net emission.
+     * Net emission = (transportation emission - reduction) + food emission.
      */
     private void fetchTodayEmission() {
         if (serverDateObject == null) serverDateObject = new Date();
@@ -248,17 +249,17 @@ public class FootPrintFragment extends Fragment {
         Tasks.whenAllSuccess(transTask, foodTask)
                 .addOnSuccessListener(tasks -> {
                     if (!isAdded() || rootView == null) return;
-                    double transportVal = 0.0, foodVal = 0.0;
+                    double transportVal = 0.0, foodVal = 0.0, reduction = 0.0;
                     if (tasks.size() >= 2) {
                         DocumentSnapshot transDoc = (DocumentSnapshot) tasks.get(0);
                         DocumentSnapshot foodDoc = (DocumentSnapshot) tasks.get(1);
                         if (transDoc != null && transDoc.exists()) {
                             Double tVal = parseDouble(transDoc.getString("total_carbon_footprint"));
                             if (tVal != null) transportVal = tVal;
-                            // Update reduceValue from the "total_carbon_reduced" field
                             String reductionStr = transDoc.getString("total_carbon_reduced");
                             if (reductionStr != null && !reductionStr.isEmpty()) {
-                                reduceValue.setText(String.format(Locale.getDefault(), "%.2f", Double.parseDouble(reductionStr)));
+                                reduction = Double.parseDouble(reductionStr);
+                                reduceValue.setText(String.format(Locale.getDefault(), "%.2f", reduction));
                             } else {
                                 reduceValue.setText("0.0");
                             }
@@ -268,7 +269,9 @@ public class FootPrintFragment extends Fragment {
                             if (fVal != null) foodVal = fVal;
                         }
                     }
-                    double dailyCO2 = transportVal + foodVal;
+                    // Calculate net transportation emission.
+                    double netTransport = transportVal - reduction;
+                    double dailyCO2 = netTransport + foodVal;
                     emissionText.setText(String.format(Locale.getDefault(),
                             "You have emitted %.2f kg CO2 this day", dailyCO2));
                     emittedValue.setText(String.format(Locale.getDefault(), "%.2f", dailyCO2));
@@ -301,7 +304,7 @@ public class FootPrintFragment extends Fragment {
     }
 
     /**
-     * Fetch single-day gauge data.
+     * Fetch single-day gauge data and update the gauge.
      */
     private void fetchCarbonFootprintData() {
         if (serverDateObject == null) return;
@@ -327,24 +330,27 @@ public class FootPrintFragment extends Fragment {
         Tasks.whenAllSuccess(transTask, foodTask)
                 .addOnSuccessListener(tasks -> {
                     if (!isAdded() || rootView == null) return;
-                    double tVal = 0.0, fVal = 0.0;
+                    double tVal = 0.0, fVal = 0.0, reduction = 0.0;
                     if (tasks.size() >= 2) {
                         DocumentSnapshot transDoc = (DocumentSnapshot) tasks.get(0);
                         DocumentSnapshot foodDoc = (DocumentSnapshot) tasks.get(1);
                         if (transDoc != null && transDoc.exists()) {
                             Double parsedT = parseDouble(transDoc.getString("total_carbon_footprint"));
                             if (parsedT != null) tVal = parsedT;
+                            String reductionStr = transDoc.getString("total_carbon_reduced");
+                            if (reductionStr != null && !reductionStr.isEmpty()) {
+                                reduction = Double.parseDouble(reductionStr);
+                            }
                         }
                         if (foodDoc != null && foodDoc.exists()) {
                             Double parsedF = parseDouble(foodDoc.getString("total_carbon_footprint"));
                             if (parsedF != null) fVal = parsedF;
                         }
                     }
-                    transportEmission = tVal;
-                    foodEmission = fVal;
-                    double total = transportEmission + foodEmission;
+                    double netTransport = tVal - reduction;
+                    double total = netTransport + fVal;
                     updateGauge(total);
-                    updateHorizontalBars(transportEmission, foodEmission);
+                    updateHorizontalBars(netTransport, fVal);
                 })
                 .addOnFailureListener(e -> {
                     if (!isAdded() || rootView == null) return;
@@ -353,7 +359,8 @@ public class FootPrintFragment extends Fragment {
     }
 
     /**
-     * Fetch single-day bar chart data.
+     * Fetch single-day bar chart data, calculating net transportation emission,
+     * and update the bar chart.
      */
     private void fetchSingleDayBarGraphData() {
         if (serverDateObject == null) return;
@@ -381,12 +388,19 @@ public class FootPrintFragment extends Fragment {
                     if (!isAdded() || rootView == null) return;
                     double transportVal = 0;
                     double foodVal = 0;
+                    double reduction = 0;
                     if (tasks.size() >= 2) {
                         DocumentSnapshot transDoc = (DocumentSnapshot) tasks.get(0);
                         DocumentSnapshot foodDoc = (DocumentSnapshot) tasks.get(1);
                         if (transDoc != null && transDoc.exists()) {
                             Double cf = parseDouble(transDoc.getString("total_carbon_footprint"));
                             if (cf != null) transportVal = cf;
+                            String reductionStr = transDoc.getString("total_carbon_reduced");
+                            if (reductionStr != null && !reductionStr.isEmpty()) {
+                                reduction = Double.parseDouble(reductionStr);
+                            }
+                            // Calculate net transport emission.
+                            transportVal = transportVal - reduction;
                         }
                         if (foodDoc != null && foodDoc.exists()) {
                             Double cf = parseDouble(foodDoc.getString("total_carbon_footprint"));
@@ -454,9 +468,15 @@ public class FootPrintFragment extends Fragment {
                         DocumentSnapshot foodDoc = (DocumentSnapshot) results.get(i + 7);
                         double transVal = 0.0;
                         double foodVal = 0.0;
+                        double reduction = 0.0;
                         if (transDoc != null && transDoc.exists()) {
                             Double parsedT = parseDouble(transDoc.getString("total_carbon_footprint"));
                             if (parsedT != null) transVal = parsedT;
+                            String reductionStr = transDoc.getString("total_carbon_reduced");
+                            if (reductionStr != null && !reductionStr.isEmpty()) {
+                                reduction = Double.parseDouble(reductionStr);
+                            }
+                            transVal = transVal - reduction;
                         }
                         if (foodDoc != null && foodDoc.exists()) {
                             Double parsedF = parseDouble(foodDoc.getString("total_carbon_footprint"));
@@ -521,7 +541,7 @@ public class FootPrintFragment extends Fragment {
 
     /**
      * Returns a list of date strings (yyyy-MM-dd) for the current week (Monday–Sunday),
-     * forcing the year to the server’s year.
+     * using the server's year.
      */
     private List<String> getDatesForThisWeek() {
         List<String> dateList = new ArrayList<>();
@@ -622,7 +642,7 @@ public class FootPrintFragment extends Fragment {
     }
 
     /**
-     * Helper: Sum the "total_carbon_footprint" values for 7 days in a given week for a specific collection.
+     * Helper: Sum the "total_carbon_footprint" values for 7 days in a given week for a specified collection.
      */
     private Task<Double> sumDailyDocsForCollection(int weekIndex, String displayName, String collectionName) {
         if (serverDateObject == null) serverDateObject = new Date();
@@ -674,7 +694,7 @@ public class FootPrintFragment extends Fragment {
     }
 
     /**
-     * Update the PieChart gauge with the total emission.
+     * Update the PieChart gauge with the total net emission.
      */
     private void updateGauge(double totalEmission) {
         List<PieEntry> entries = new ArrayList<>();
