@@ -24,26 +24,28 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
 import com.google.android.gms.tasks.CancellationTokenSource;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 public class TrackingService extends Service {
     private static final String CHANNEL_ID = "TrackingServiceChannel";
     private static final String TAG = "TrackingService";
 
     // Relaxed accuracy & movement thresholds
-    private static final float MIN_ACCURACY = 100.0f;
-    private static final float MIN_MOVEMENT = 0.5f;
+    private static final float MIN_ACCURACY = 100.0f;  // Accept location up to 100m accuracy
+    private static final float MIN_MOVEMENT = 0.5f;    // Count movements >= 0.5m
 
     // Speed thresholds in m/s for various modes
     private static final float WALK_MAX_SPEED = 1.5f;
@@ -56,14 +58,15 @@ public class TrackingService extends Service {
     private Location lastLocation = null;
     private float totalDistance = 0;
     private float totalCarbon = 0;
-    private String selectedMode = "Car";
+    private String selectedMode = "Car"; // auto-detected travel mode
     private SharedPreferences sharedPreferences;
     private long lastUpdateTime = 0;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        fusedLocationClient = com.google.android.gms.location.LocationServices.getFusedLocationProviderClient(this);
         sharedPreferences = getSharedPreferences("TrackingData", Context.MODE_PRIVATE);
         selectedMode = sharedPreferences.getString("selected_mode", "Car");
 
@@ -228,21 +231,18 @@ public class TrackingService extends Service {
     }
 
     /**
-     * Updates Firestore in a daily document using the **user's display name** as the doc ID.
-     * WARNING: This can cause collisions if two users have the same display name!
+     * Updates Firestore in a daily document using the user's display name as the doc ID.
+     * If the current travel mode is Walking, also calculate and update the carbon reduction.
      */
     private void updateTransportationInFirestore(float distance, String mode) {
         // Calculate carbon for this segment using CarbonUtils.
         float segmentCarbon = distance * CarbonUtils.getCarbonEmissionRate(mode);
-        Log.d(TAG, "Segment carbon: " + segmentCarbon + " kg for mode: " + mode);
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) {
             Log.e(TAG, "No user logged in; cannot update Firestore.");
             return;
         }
-
-        // Using displayName instead of UID
         String displayName = user.getDisplayName();
         if (displayName == null || displayName.isEmpty()) {
             Log.e(TAG, "User has no display name; cannot update Firestore with display name as doc ID.");
@@ -251,16 +251,16 @@ public class TrackingService extends Service {
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         String today = getCurrentDateString();
-
         // Document path: transportation/{displayName}/daily/{yyyy-MM-dd}
         DocumentReference docRef = db.collection("transportation")
                 .document(displayName)
                 .collection("daily")
                 .document(today);
 
-        Log.d(TAG, "Updating Firestore daily document: " + today + " under doc ID (displayName): " + displayName);
+        // Retrieve the current document (if any)
         docRef.get().addOnSuccessListener(documentSnapshot -> {
             double currentCarbon = 0.0;
+            double currentReduction = 0.0;
             if (documentSnapshot.exists()) {
                 String carbonStr = documentSnapshot.getString("total_carbon_footprint");
                 if (carbonStr != null && !carbonStr.isEmpty()) {
@@ -268,15 +268,37 @@ public class TrackingService extends Service {
                         currentCarbon = Double.parseDouble(carbonStr);
                     } catch (NumberFormatException e) {
                         Log.e(TAG, "Error parsing current carbon: " + carbonStr, e);
-                        currentCarbon = 0.0;
+                    }
+                }
+                String reductionStr = documentSnapshot.getString("total_carbon_reduced");
+                if (reductionStr != null && !reductionStr.isEmpty()) {
+                    try {
+                        currentReduction = Double.parseDouble(reductionStr);
+                    } catch (NumberFormatException e) {
+                        Log.e(TAG, "Error parsing current reduction: " + reductionStr, e);
                     }
                 }
             }
             double updatedCarbon = currentCarbon + segmentCarbon;
-            Log.d(TAG, "Current carbon: " + currentCarbon + " kg, Updated carbon: " + updatedCarbon + " kg");
-            docRef.set(Collections.singletonMap("total_carbon_footprint", String.valueOf(updatedCarbon)))
+
+            // Prepare the update map
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("total_carbon_footprint", String.valueOf(updatedCarbon));
+
+            // If the user is walking, compute the carbon reduction compared to using a Car.
+            if (mode.equals("Walking")) {
+                float carRate = CarbonUtils.getCarbonEmissionRate("Car");
+                float walkingRate = CarbonUtils.getCarbonEmissionRate("Walking");
+                // The reduction is the difference in emissions if the user had driven instead.
+                float segmentReduction = distance * (carRate - walkingRate);
+                double updatedReduction = currentReduction + segmentReduction;
+                updates.put("total_carbon_reduced", String.valueOf(updatedReduction));
+            }
+            // Use merge so that existing fields are retained.
+            docRef.set(updates, SetOptions.merge())
                     .addOnSuccessListener(aVoid -> {
-                        Log.d(TAG, "Firestore daily doc updated with new carbon: " + updatedCarbon);
+                        Log.d(TAG, "Firestore daily doc updated. New total carbon: " + updatedCarbon +
+                                (mode.equals("Walking") ? ", and carbon reduction updated." : ""));
                     })
                     .addOnFailureListener(e -> {
                         Log.e(TAG, "Failed to update daily doc", e);

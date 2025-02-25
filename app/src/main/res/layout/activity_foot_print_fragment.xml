@@ -289,19 +289,25 @@
                     android:orientation="horizontal">
 
                     <RadioButton
+                        android:id="@+id/radioToday"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Today"
+                        android:checked="true" />
+
+                    <RadioButton
                         android:id="@+id/radioWeek"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Week"
-                        android:checked="true" />
+                        android:text="Week" />
 
                     <RadioButton
                         android:id="@+id/radioMonth"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Month"
-                        android:layout_marginStart="16dp" />
+                        android:text="Month" />
                 </RadioGroup>
+
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 

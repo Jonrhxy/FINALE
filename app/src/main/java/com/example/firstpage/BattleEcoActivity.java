@@ -121,7 +121,7 @@ public class BattleEcoActivity extends AppCompatActivity {
         player.addCard(new BattleCard(CardType.POISON, 15, "Poison (3 DPS for 5 sec)", R.drawable.meat_cards));
         player.addCard(new BattleCard(CardType.SLASH, 75, "Slash (-75 Burst Damage)", R.drawable.cheese_cards));
         player.addCard(new BattleCard(CardType.PIERCING, 50, "Piercing (-50 Damage, Ignores Shields)", R.drawable.shrimp_cards));
-        player.addCard(new BattleCard(CardType.NORMAL_ATTACK, 20, "Normal Attack (-20 Damage, No Energy Cost)", R.drawable.artificialgrowth_cards));
+        player.addCard(new BattleCard(CardType.NORMAL_ATTACK, 20, "Normal Attack (-20 Damage, No Energy Cost)", R.drawable.artificial_growth_cards));
 
         computer.addCard(new BattleCard(CardType.HEAL, 25, "Heal (+25 HP)", R.drawable.banana_cards));
         computer.addCard(new BattleCard(CardType.ENERGY, 1, "Energy (+1 Energy)", R.drawable.almond_cards));
@@ -129,7 +129,7 @@ public class BattleEcoActivity extends AppCompatActivity {
         computer.addCard(new BattleCard(CardType.POISON, 15, "Poison (3 DPS for 5 sec)", R.drawable.meat_cards));
         computer.addCard(new BattleCard(CardType.SLASH, 75, "Slash (-75 Burst Damage)", R.drawable.cheese_cards));
         computer.addCard(new BattleCard(CardType.PIERCING, 50, "Piercing (-50 Damage, Ignores Shields)", R.drawable.shrimp_cards));
-        computer.addCard(new BattleCard(CardType.NORMAL_ATTACK, 20, "Normal Attack (-20 Damage, No Energy Cost)", R.drawable.artificialgrowth_cards));
+        computer.addCard(new BattleCard(CardType.NORMAL_ATTACK, 20, "Normal Attack (-20 Damage, No Energy Cost)", R.drawable.artificial_growth_cards));
 
         updateDeckPreview(player, playerDeckPreview);
         updateDeckPreview(computer, aiDeckPreview);

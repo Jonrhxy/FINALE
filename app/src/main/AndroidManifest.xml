@@ -1,21 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Features -->
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
 
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- Permissions -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-
-
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -31,48 +33,33 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Firstpage"
         tools:targetApi="34">
-        <service android:name=".TrackingService"/>
-        <activity
-            android:name=".Winner"
-            android:exported="false" />
+
+        <!-- Foreground service declaration for location tracking -->
+        <service
+            android:name=".TrackingService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="location"
+            tools:replace="android:foregroundServiceType" />
+
+        <!-- List of activities -->
+        <activity android:name=".Winner" android:exported="false" />
         <activity
             android:name=".BattleEcoActivity"
             android:exported="false"
             android:screenOrientation="landscape"
             android:configChanges="orientation|screenSize"/>
-        <activity
-            android:name=".GOver"
-            android:exported="false" />
-        <activity
-            android:name=".DragGame"
-            android:exported="false" />
-        <activity
-            android:name=".RewWani5per"
-            android:exported="false" />
-        <activity
-            android:name=".RewPlaym5per"
-            android:exported="false" />
-        <activity
-            android:name=".RewMasug5per"
-            android:exported="false" />
-        <activity
-            android:name=".RedeemDialog"
-            android:exported="false" />
-        <activity
-            android:name=".FragmentRewardM"
-            android:exported="false" />
-
-        <service android:name=".TrackingService" />
-
-        <activity
-            android:name=".eggtoast"
-            android:exported="false" />
-        <activity
-            android:name=".Chall1"
-            android:exported="false" />
-        <activity
-            android:name=".Transportation"
-            android:exported="false" />
+        <activity android:name=".GOver" android:exported="false" />
+        <activity android:name=".DragGame" android:exported="false" />
+        <activity android:name=".RewWani5per" android:exported="false" />
+        <activity android:name=".RewPlaym5per" android:exported="false" />
+        <activity android:name=".RewMasug5per" android:exported="false" />
+        <activity android:name=".RedeemDialog" android:exported="false" />
+        <activity android:name=".FragmentRewardM" android:exported="false" />
+        <activity android:name=".eggtoast" android:exported="false" />
+        <activity android:name=".Chall1" android:exported="false" />
+        <activity android:name=".Chall3" android:exported="false" />
+        <activity android:name=".Transportation" android:exported="false" />
         <activity android:name=".Bfast1Fragment" />
         <activity android:name=".Sphere" />
         <activity android:name=".Ice" />
@@ -83,103 +70,40 @@
         <activity android:name=".Environment" />
         <activity android:name=".GameOver" />
         <activity android:name=".GameActivity" />
-        <activity
-            android:name=".Game1Tut"
-            android:exported="false" />
+        <activity android:name=".Game1Tut" android:exported="false" />
         <activity android:name=".Game" />
-        <activity
-            android:name=".Quiz1After"
-            android:exported="false" />
-        <activity
-            android:name=".EditProfile"
-            android:exported="false" />
-        <activity
-            android:name=".Quiz5of1"
-            android:exported="false" />
-        <activity
-            android:name=".Quiz4of1"
-            android:exported="false" />
-        <activity
-            android:name=".Quiz3of1"
-            android:exported="false" />
-        <activity
-            android:name=".Quiz2of1"
-            android:exported="false" />
-        <activity
-            android:name=".Quiz1of1"
-            android:exported="false" />
-        <activity
-            android:name=".LeaderBoards"
-            android:exported="false" />
-        <activity
-            android:name=".Video"
-            android:exported="false" />
-        <activity
-            android:name=".Question9"
-            android:exported="false" />
-        <activity
-            android:name=".Question8"
-            android:exported="false" />
-        <activity
-            android:name=".Question7"
-            android:exported="false" />
-        <activity
-            android:name=".Question6"
-            android:exported="false" />
-        <activity
-            android:name=".Question5"
-            android:exported="false" />
-        <activity
-            android:name=".Question4"
-            android:exported="false" />
-        <activity
-            android:name=".Question3"
-            android:exported="false" />
-        <activity
-            android:name=".Question2"
-            android:exported="false" />
-        <activity
-            android:name=".Question1"
-            android:exported="false" />
-        <activity
-            android:name=".LearnMore"
-            android:exported="false" />
-        <activity
-            android:name=".Wani_Ent"
-            android:exported="false" />
-        <activity
-            android:name=".PlayMaker_Ent"
-            android:exported="false" />
-        <activity
-            android:name=".Masugid_Ent"
-            android:exported="false" />
-        <activity
-            android:name=".navbar"
-            android:exported="false" />
-        <activity
-            android:name=".AfterQuestion"
-            android:exported="false" />
-        <activity
-            android:name=".Questions"
-            android:exported="false" />
-        <activity
-            android:name=".Signin"
-            android:exported="false" />
-        <activity
-            android:name=".verify_email"
-            android:exported="false" />
-        <activity
-            android:name=".Loadingpage"
-            android:exported="false" />
-        <activity
-            android:name=".Register"
-            android:exported="false" />
-        <activity
-            android:name=".MainActivity"
-            android:exported="true">
+        <activity android:name=".Quiz1After" android:exported="false" />
+        <activity android:name=".EditProfile" android:exported="false" />
+        <activity android:name=".Quiz5of1" android:exported="false" />
+        <activity android:name=".Quiz4of1" android:exported="false" />
+        <activity android:name=".Quiz3of1" android:exported="false" />
+        <activity android:name=".Quiz2of1" android:exported="false" />
+        <activity android:name=".Quiz1of1" android:exported="false" />
+        <activity android:name=".LeaderBoards" android:exported="false" />
+        <activity android:name=".Video" android:exported="false" />
+        <activity android:name=".Question9" android:exported="false" />
+        <activity android:name=".Question8" android:exported="false" />
+        <activity android:name=".Question7" android:exported="false" />
+        <activity android:name=".Question6" android:exported="false" />
+        <activity android:name=".Question5" android:exported="false" />
+        <activity android:name=".Question4" android:exported="false" />
+        <activity android:name=".Question3" android:exported="false" />
+        <activity android:name=".Question2" android:exported="false" />
+        <activity android:name=".Question1" android:exported="false" />
+        <activity android:name=".LearnMore" android:exported="false" />
+        <activity android:name=".Wani_Ent" android:exported="false" />
+        <activity android:name=".PlayMaker_Ent" android:exported="false" />
+        <activity android:name=".Masugid_Ent" android:exported="false" />
+        <activity android:name=".navbar" android:exported="false" />
+        <activity android:name=".AfterQuestion" android:exported="false" />
+        <activity android:name=".Questions" android:exported="false" />
+        <activity android:name=".Signin" android:exported="false" />
+        <activity android:name=".verify_email" android:exported="false" />
+        <activity android:name=".Loadingpage" android:exported="false" />
+        <activity android:name=".Register" android:exported="false" />
+        <activity android:name=".MainActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

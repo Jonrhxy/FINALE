@@ -72,7 +72,7 @@ public class Transportation extends AppCompatActivity {
             listenToFirestoreUpdates();
         }
 
-        registerReceiver(trackingReceiver, new IntentFilter("TRACKING_UPDATE"));
+        registerReceiver(trackingReceiver, new IntentFilter("TRACKING_UPDATE"), Context.RECEIVER_NOT_EXPORTED);
 
         checkPermissions();
         checkGpsEnabled();
@@ -146,8 +146,10 @@ public class Transportation extends AppCompatActivity {
         }
     }
 
+    // Updated updateUI() method: Converts totalDistance from meters to kilometers.
     private void updateUI(int totalDistance, int totalCarbon, String selectedMode) {
-        distanceTextView.setText("Distance Traveled: " + totalDistance + " meters");
+        double distanceInKm = totalDistance / 1000.0;
+        distanceTextView.setText(String.format(Locale.getDefault(), "Distance Traveled: %.2f km", distanceInKm));
         carbonTextView.setText("CO₂ Emission: " + totalCarbon + " kg");
         travelModeTextView.setText("Mode: " + selectedMode);
     }

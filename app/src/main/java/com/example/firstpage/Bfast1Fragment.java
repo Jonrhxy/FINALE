@@ -18,12 +18,20 @@ import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.label.ImageLabel;
 import com.google.mlkit.vision.label.ImageLabeling;
 import com.google.mlkit.vision.label.defaults.ImageLabelerOptions;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class Bfast1Fragment extends AppCompatActivity {
@@ -36,6 +44,8 @@ public class Bfast1Fragment extends AppCompatActivity {
     private Bitmap imageBitmap;
 
     // Extended food categories with their estimated CO2 emissions (in kg CO2 per kg).
+    // Note: Using Java 9+ style Map.ofEntries might require additional setup. If you get errors,
+    // switch to a HashMap or similar approach.
     private static final Map<String, Float> foodCO2Map = Map.ofEntries(
             Map.entry("beef", 27.0f),
             Map.entry("chicken", 6.9f),
@@ -89,8 +99,8 @@ public class Bfast1Fragment extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bfast1_fragment);
 
-        final Button captureButton = findViewById(R.id.captureButton);
-        final Button pickImageButton = findViewById(R.id.pickImageButton);
+        Button captureButton = findViewById(R.id.captureButton);
+        Button pickImageButton = findViewById(R.id.pickImageButton);
         imageView = findViewById(R.id.imageView1);
         resultText = findViewById(R.id.resultText);
 
@@ -159,7 +169,7 @@ public class Bfast1Fragment extends AppCompatActivity {
         InputImage image = InputImage.fromBitmap(imageBitmap, 0);
         com.google.mlkit.vision.label.ImageLabeler labeler =
                 ImageLabeling.getClient(new ImageLabelerOptions.Builder()
-                        .setConfidenceThreshold(0.7f)  // Adjust threshold if necessary.
+                        .setConfidenceThreshold(0.7f)  // Adjust threshold if needed
                         .build());
 
         labeler.process(image)
@@ -167,18 +177,20 @@ public class Bfast1Fragment extends AppCompatActivity {
                 .addOnFailureListener(e -> resultText.setText("Error: " + e.getMessage()));
     }
 
-    private void filterFoodLabels(List<ImageLabel> labels) {
-        // Use a map to record the best (highest-confidence) match for each food category.
+    /**
+     * Process the detected labels, find food categories, sum their carbon footprint,
+     * display them, and update Firestore daily doc in food_sources/{displayName}/daily/{yyyy-MM-dd}.
+     */
+    private void filterFoodLabels(List<com.google.mlkit.vision.label.ImageLabel> labels) {
+        // Keep track of the best (highest-confidence) match for each recognized category
         Map<String, Float> bestMatches = new HashMap<>();
 
-        // Log all detected labels for debugging.
-        for (ImageLabel label : labels) {
-            Log.d(TAG, "Detected label: " + label.getText() + " (Confidence: " + label.getConfidence() + ")");
+        for (com.google.mlkit.vision.label.ImageLabel label : labels) {
             float confidence = label.getConfidence();
             String normalizedLabel = label.getText().toLowerCase();
             String matchedFood = null;
 
-            // Check for a direct match in foodCO2Map.
+            // Direct match in foodCO2Map
             for (String foodKey : foodCO2Map.keySet()) {
                 if (normalizedLabel.contains(foodKey)) {
                     matchedFood = foodKey;
@@ -186,7 +198,7 @@ public class Bfast1Fragment extends AppCompatActivity {
                 }
             }
 
-            // If no direct match, check against synonyms.
+            // If no direct match, check synonyms
             if (matchedFood == null) {
                 for (Map.Entry<String, String> entry : foodSynonymsMap.entrySet()) {
                     if (normalizedLabel.contains(entry.getKey())) {
@@ -196,7 +208,7 @@ public class Bfast1Fragment extends AppCompatActivity {
                 }
             }
 
-            // Update bestMatches if a food category is found.
+            // Update bestMatches if found
             if (matchedFood != null) {
                 if (!bestMatches.containsKey(matchedFood) || confidence > bestMatches.get(matchedFood)) {
                     bestMatches.put(matchedFood, confidence);
@@ -204,20 +216,84 @@ public class Bfast1Fragment extends AppCompatActivity {
             }
         }
 
-        // If multiple food categories are detected, sort them by confidence.
         if (!bestMatches.isEmpty()) {
+            // Sort by confidence descending
             List<Map.Entry<String, Float>> sortedMatches = new ArrayList<>(bestMatches.entrySet());
             sortedMatches.sort((e1, e2) -> Float.compare(e2.getValue(), e1.getValue()));
 
+            // Build results text and sum carbon
             StringBuilder results = new StringBuilder();
+            float totalFoodCarbon = 0f;
             for (Map.Entry<String, Float> entry : sortedMatches) {
-                results.append(entry.getKey())
+                String foodKey = entry.getKey();
+                float carbonVal = foodCO2Map.getOrDefault(foodKey, 0f);
+                results.append(foodKey)
                         .append(" - Estimated CO2 Emission: ")
-                        .append(foodCO2Map.get(entry.getKey())).append(" kg CO2/kg\n");
+                        .append(carbonVal).append(" kg CO2/kg\n");
+                totalFoodCarbon += carbonVal;
             }
+
+            // Show results in the UI
             resultText.setText(results.toString());
+
+            // Update Firestore daily doc with the sum of carbon for recognized items
+            updateFoodFirestore(totalFoodCarbon);
+
         } else {
             resultText.setText("No food detected.");
         }
     }
+
+    /**
+     * Updates the daily doc in Firestore at:
+     *   food_sources/{displayName}/daily/{yyyy-MM-dd}
+     * by adding the detected carbon amount to "total_carbon_footprint".
+     */
+    private void updateFoodFirestore(float detectedFoodCarbon) {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) {
+            Log.e(TAG, "No user logged in; cannot update Firestore for food.");
+            return;
+        }
+        String displayName = user.getDisplayName();
+        if (displayName == null || displayName.isEmpty()) {
+            Log.e(TAG, "User has no display name; cannot update Firestore with display name as doc ID.");
+            return;
+        }
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+
+        DocumentReference docRef = db.collection("food_sources")
+                .document(displayName)
+                .collection("daily")
+                .document(today);
+
+        docRef.get().addOnSuccessListener(documentSnapshot -> {
+            double currentCarbon = 0.0;
+            if (documentSnapshot.exists()) {
+                String carbonStr = documentSnapshot.getString("total_carbon_footprint");
+                if (carbonStr != null && !carbonStr.isEmpty()) {
+                    try {
+                        currentCarbon = Double.parseDouble(carbonStr);
+                    } catch (NumberFormatException e) {
+                        currentCarbon = 0.0;
+                    }
+                }
+            }
+            double updatedCarbon = currentCarbon + detectedFoodCarbon;
+
+            Map<String, Object> data = new HashMap<>();
+            data.put("total_carbon_footprint", String.valueOf(updatedCarbon));
+
+            docRef.set(data)
+                    .addOnSuccessListener(aVoid ->
+                            Log.d(TAG, "Firestore daily doc updated with new food carbon: " + updatedCarbon))
+                    .addOnFailureListener(e ->
+                            Log.e(TAG, "Failed to update daily doc for food", e));
+        }).addOnFailureListener(e -> {
+            Log.e(TAG, "Failed to get daily doc for displayName: " + displayName, e);
+        });
+    }
 }
+
