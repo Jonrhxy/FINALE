@@ -16,14 +16,20 @@
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowCloseOnTouchOutside">false</item>
         <item name="android:windowBackground">@android:color/transparent</item>
-        <!-- This line must be true if you want the default dim behind the dialog -->
         <item name="android:backgroundDimEnabled">true</item>
     </style>
 
-    <!-- res/values/styles.xml -->
+    <!-- Custom RadioButton style -->
     <style name="CustomRadioButton" parent="Widget.MaterialComponents.CompoundButton.RadioButton">
-        <item name="android:buttonTint">@color/Green</item> <!-- Green circle color -->
-        <item name="android:textColor">@color/LBrown</item> <!-- Text color -->
+        <item name="android:buttonTint">@color/Green</item>
+        <item name="android:textColor">@color/LBrown</item>
+    </style>
+
+    <!-- Full-screen theme for VehicleStatusActivity -->
+    <style name="Theme.AppCompat.Light.NoActionBar.FullScreen" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/black</item>
     </style>
 
 </resources>

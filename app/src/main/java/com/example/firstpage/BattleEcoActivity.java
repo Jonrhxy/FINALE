@@ -120,7 +120,7 @@ public class BattleEcoActivity extends AppCompatActivity {
         player.addCard(new BattleCard(CardType.SHIELD, 40, "Shield (+40 Shields)", R.drawable.peas_cards));
         player.addCard(new BattleCard(CardType.POISON, 15, "Poison (3 DPS for 5 sec)", R.drawable.meat_cards));
         player.addCard(new BattleCard(CardType.SLASH, 75, "Slash (-75 Burst Damage)", R.drawable.cheese_cards));
-        player.addCard(new BattleCard(CardType.PIERCING, 50, "Piercing (-50 Damage, Ignores Shields)", R.drawable.shrimp_cards));
+        player.addCard(new BattleCard(CardType.PIERCING, 30, "Piercing (-30 Damage, Ignores Shields)", R.drawable.shrimp_cards));
         player.addCard(new BattleCard(CardType.NORMAL_ATTACK, 20, "Normal Attack (-20 Damage, No Energy Cost)", R.drawable.artificial_growth_cards));
 
         computer.addCard(new BattleCard(CardType.HEAL, 25, "Heal (+25 HP)", R.drawable.banana_cards));
@@ -128,7 +128,7 @@ public class BattleEcoActivity extends AppCompatActivity {
         computer.addCard(new BattleCard(CardType.SHIELD, 40, "Shield (+40 Shields)", R.drawable.peas_cards));
         computer.addCard(new BattleCard(CardType.POISON, 15, "Poison (3 DPS for 5 sec)", R.drawable.meat_cards));
         computer.addCard(new BattleCard(CardType.SLASH, 75, "Slash (-75 Burst Damage)", R.drawable.cheese_cards));
-        computer.addCard(new BattleCard(CardType.PIERCING, 50, "Piercing (-50 Damage, Ignores Shields)", R.drawable.shrimp_cards));
+        computer.addCard(new BattleCard(CardType.PIERCING, 30, "Piercing (-30 Damage, Ignores Shields)", R.drawable.shrimp_cards));
         computer.addCard(new BattleCard(CardType.NORMAL_ATTACK, 20, "Normal Attack (-20 Damage, No Energy Cost)", R.drawable.artificial_growth_cards));
 
         updateDeckPreview(player, playerDeckPreview);
@@ -204,7 +204,7 @@ public class BattleEcoActivity extends AppCompatActivity {
         playerDrawButton.setEnabled(false);
 
         animateText(npcMessage,
-                "Instructions: Use your cards wisely. Red cards cost 1 energy, ENERGY cards add energy, " +
+                "Instructions: Use your cards wisely. Red cards cost 1 energy except 1 red card which Artificial Growth, ENERGY cards add energy, " +
                         "HEAL restores HP, and SHIELD protects you. Tap 'Draw Card' to begin the battle.",
                 0
         );
@@ -501,7 +501,7 @@ public class BattleEcoActivity extends AppCompatActivity {
                         playerShield = 0;
                     }
                     playerHealth -= damage;
-                    logMessage = "Computer used SLASH, dealing " + damage + " damage.";
+                    logMessage = "Computer used SLASH, blocked by shields " + damage + " damage.";
                 }
                 break;
             case PIERCING:
@@ -535,7 +535,7 @@ public class BattleEcoActivity extends AppCompatActivity {
                         playerShield = 0;
                     }
                     playerHealth -= damage;
-                    logMessage = "Computer used NORMAL ATTACK, dealing " + damage + " damage.";
+                    logMessage = "Computer used NORMAL ATTACK, blocked by shields " + damage + " damage.";
                 }
                 break;
         }

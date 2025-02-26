@@ -31,6 +31,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Arrays;
+import java.util.List;
 
 public class Register extends AppCompatActivity {
 
@@ -106,7 +108,6 @@ public class Register extends AppCompatActivity {
     private boolean isValidName(String name) {
         return name.matches("^[a-zA-Z ]+$");
     }
-
 
     // Helper method to validate student ID (numbers and hyphens)
     private boolean isValidStudentId(String id) {
@@ -214,6 +215,22 @@ public class Register extends AppCompatActivity {
             studentId.requestFocus();
             return;
         }
+
+        // List of allowed student IDs
+        List<String> allowedIDs = Arrays.asList(
+                "21-1977", "21-1959", "21-1964",
+                "21-1950", "21-1947", "21-1975",
+                "21-1935", "21-1944", "21-1954",
+                "21-1949", "21-1798", "21-1874",
+                "21-1990", "21-1936", "21-1980",
+                "21-1963"
+        );
+        if (!allowedIDs.contains(studentID)) {
+            studentId.setError("Invalid student ID.");
+            studentId.requestFocus();
+            return;
+        }
+
         if (TextUtils.isEmpty(email)) {
             txtEmail.setError("Email is required.");
             txtEmail.requestFocus();
@@ -229,7 +246,7 @@ public class Register extends AppCompatActivity {
             txtpass.requestFocus();
             return;
         }
-        if (password.length() < 8 ) {
+        if (password.length() < 8) {
             txtpass.setError("Password must be at least 8 characters.");
             txtpass.requestFocus();
             return;
@@ -241,32 +258,52 @@ public class Register extends AppCompatActivity {
         }
         progressBar.setVisibility(View.VISIBLE);
 
-        mAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, task -> {
-                    progressBar.setVisibility(View.GONE);
+        // Check if the student ID is already registered
+        db.collection("users")
+                .whereEqualTo("studentID", studentID)
+                .get()
+                .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        FirebaseUser user = mAuth.getCurrentUser();
-                        if (user != null) {
-                            UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                                    .setDisplayName(username)
-                                    .build();
-                            user.updateProfile(profileUpdates)
-                                    .addOnCompleteListener(task1 -> {
-                                        if (task1.isSuccessful()) {
-                                            saveUserToFirestore(user, username, firstName, lastName, email, studentID);
-                                            sendVerificationEmail(user);
+                        if (!task.getResult().isEmpty()) {
+                            progressBar.setVisibility(View.GONE);
+                            studentId.setError("Student ID is already registered.");
+                            studentId.requestFocus();
+                            return;
+                        } else {
+                            // Proceed with registration since the student ID is unique
+                            mAuth.createUserWithEmailAndPassword(email, password)
+                                    .addOnCompleteListener(this, authTask -> {
+                                        progressBar.setVisibility(View.GONE);
+                                        if (authTask.isSuccessful()) {
+                                            FirebaseUser user = mAuth.getCurrentUser();
+                                            if (user != null) {
+                                                UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                                                        .setDisplayName(username)
+                                                        .build();
+                                                user.updateProfile(profileUpdates)
+                                                        .addOnCompleteListener(task1 -> {
+                                                            if (task1.isSuccessful()) {
+                                                                saveUserToFirestore(user, username, firstName, lastName, email, studentID);
+                                                                sendVerificationEmail(user);
+                                                            }
+                                                        });
+                                            }
+                                        } else {
+                                            if (authTask.getException() instanceof FirebaseAuthUserCollisionException) {
+                                                txtEmail.setError("Email is already registered.");
+                                            } else {
+                                                Toast.makeText(Register.this, "Registration failed: " + authTask.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                            }
                                         }
                                     });
                         }
                     } else {
-                        if (task.getException() instanceof FirebaseAuthUserCollisionException) {
-                            txtEmail.setError("Email is already registered.");
-                        } else {
-                            Toast.makeText(Register.this, "Registration failed: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                        }
+                        progressBar.setVisibility(View.GONE);
+                        Toast.makeText(Register.this, "Error checking student ID uniqueness.", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
+
 
 
     private boolean validateInput(String username, String firstName, String lastName, String email, String password, String confirmPassword, String studentID) {

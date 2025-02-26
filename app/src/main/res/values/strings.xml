@@ -425,7 +425,7 @@
     <string name="point">Points once redeemed will not be refunded.</string>
     <string name="doyouwant">Do you want to redeem?</string>
     <string name="g2title">GREEN OR MEAN?</string>
-    <string name="g2desc">Prove your eco-smarts with every drop!</string>
+    <string name="g2desc"> Turn-based card battle game where you play as a Plant Hero battling high-carbon foes. Use strategic cards to manage health, energy, and defenses while learning eco-tips to help save the forest.</string>
     <string name="highcarb">High Carbon</string>
     <string name="lowcarb">Low Carbon</string>
     <string name="score">Score: 0</string>
@@ -466,5 +466,5 @@
     <string name="choose1">Select one to continue</string>
     <string name="lives">Your lives: 3</string>
     <string name="notA">Not Applicable</string>
-    <string name="g3title">LARO NI JERICK GARCIA</string>
+    <string name="g3title">BATTLE ECO</string>
 </resources>

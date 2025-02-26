@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -36,6 +37,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
@@ -45,11 +47,11 @@ public class TrackingService extends Service {
     private static final String CHANNEL_ID = "TrackingServiceChannel";
     private static final String TAG = "TrackingService";
 
-    // Thresholds for location updates
-    private static final float MIN_ACCURACY = 100.0f;  // Accept locations with accuracy <= 100m
-    private static final float MIN_MOVEMENT = 0.5f;      // Count movements >= 0.5m
+    // Thresholds for location updates.
+    private static final float MIN_ACCURACY = 100.0f;  // Accept locations with accuracy <= 100m.
+    private static final float MIN_MOVEMENT = 0.5f;      // Count movements >= 0.5m.
 
-    // Speed thresholds (m/s) for determining travel mode
+    // Speed thresholds (m/s) for determining travel mode.
     private static final float WALK_MAX_SPEED = 1.5f;
     private static final float BIKE_MAX_SPEED = 11.0f;
     private static final float MOTORCYCLE_MAX_SPEED = 16.7f;
@@ -60,28 +62,32 @@ public class TrackingService extends Service {
     private Location lastLocation = null;
     private float totalDistance = 0;
     private float totalCarbon = 0;
-    private String selectedMode = "Car"; // Current mode used for emissions calculation
-    private String lastMode = "Car";     // Previous mode (vehicle if applicable)
+    // 'selectedMode' is the current mode used for emissions calculation.
+    private String selectedMode = "Car";
+    // 'confirmedMode' holds the last verified (vehicle) mode.
+    private String confirmedMode = "Car";
+    // Flag to ensure only one prompt is pending.
     private boolean confirmationPending = false;
     private SharedPreferences sharedPreferences;
     private long lastUpdateTime = 0;
 
-    // Receiver to handle vehicle status responses from the UI
+    // Receiver to handle vehicle status responses.
     private final BroadcastReceiver vehicleStatusReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            // Expect extra "in_vehicle": true if user confirms they're still in vehicle
             boolean inVehicle = intent.getBooleanExtra("in_vehicle", false);
+            Log.d(TAG, "Received VEHICLE_STATUS_RESPONSE: in_vehicle = " + inVehicle);
             if (inVehicle) {
-                // Continue with the previous vehicle mode
-                selectedMode = lastMode;
+                // Maintain the previous vehicle mode.
+                selectedMode = confirmedMode;
+                Log.d(TAG, "User confirmed vehicle mode. Keeping confirmedMode: " + confirmedMode);
             } else {
-                // Switch to walking mode
+                // Switch to walking.
                 selectedMode = "Walking";
+                confirmedMode = "Walking";
+                Log.d(TAG, "User indicated not in vehicle. Switching to Walking mode.");
             }
             confirmationPending = false;
-            Log.d(TAG, "Vehicle status response: inVehicle=" + inVehicle + ", selectedMode=" + selectedMode);
-            // Send update broadcast so UI can refresh (if needed)
             sendUpdates();
         }
     };
@@ -92,17 +98,22 @@ public class TrackingService extends Service {
 
         fusedLocationClient = com.google.android.gms.location.LocationServices.getFusedLocationProviderClient(this);
         sharedPreferences = getSharedPreferences("TrackingData", Context.MODE_PRIVATE);
-        selectedMode = sharedPreferences.getString("selected_mode", "Car");
-        lastMode = selectedMode; // initialize lastMode
+        // Default to Walking if nothing is stored.
+        selectedMode = sharedLocationPreferences();
+        confirmedMode = selectedMode;
+        Log.d(TAG, "onCreate: selectedMode and confirmedMode initialized to: " + selectedMode);
 
-        // Debug: Check if GPS is enabled.
+        // Check if GPS is enabled.
         LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         if (lm != null) {
             Log.d(TAG, "GPS enabled: " + lm.isProviderEnabled(LocationManager.GPS_PROVIDER));
         }
 
         // Register receiver for vehicle status responses.
-        registerReceiver(vehicleStatusReceiver, new IntentFilter("VEHICLE_STATUS_RESPONSE"), Context.RECEIVER_NOT_EXPORTED);
+        registerReceiver(vehicleStatusReceiver,
+                new IntentFilter("VEHICLE_STATUS_RESPONSE"),
+                Context.RECEIVER_NOT_EXPORTED);
+        Log.d(TAG, "Registered vehicleStatusReceiver.");
 
         createNotificationChannel();
         startForegroundServiceWithNotification();
@@ -110,26 +121,34 @@ public class TrackingService extends Service {
         requestImmediateLocationUpdate();
     }
 
+    // Retrieve saved mode from SharedPreferences (default to "Walking").
+    private String sharedLocationPreferences() {
+        String mode = sharedPreferences.getString("selected_mode", "Walking");
+        Log.d(TAG, "sharedLocationPreferences: mode = " + mode);
+        return mode;
+    }
+
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
-                    CHANNEL_ID, "Tracking Service", NotificationManager.IMPORTANCE_LOW
-            );
+                    CHANNEL_ID, "Tracking Service", NotificationManager.IMPORTANCE_LOW);
             NotificationManager manager = getSystemService(NotificationManager.class);
             if (manager != null) {
                 manager.createNotificationChannel(channel);
+                Log.d(TAG, "Notification channel created.");
             }
         }
     }
 
     private void startForegroundServiceWithNotification() {
+        // This is the ongoing notification for the service.
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle("Tracking Active")
                 .setContentText("Using GPS & Network for location.")
                 .setSmallIcon(R.drawable.ic_launcher_foreground)
                 .setPriority(NotificationCompat.PRIORITY_LOW);
-
         startForeground(1, builder.build());
+        Log.d(TAG, "Foreground service started with notification.");
     }
 
     private void setupLocationUpdates() {
@@ -137,7 +156,6 @@ public class TrackingService extends Service {
                 .setMinUpdateDistanceMeters(MIN_MOVEMENT)
                 .setPriority(Priority.PRIORITY_BALANCED_POWER_ACCURACY)
                 .build();
-
         locationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
@@ -147,13 +165,14 @@ public class TrackingService extends Service {
                 }
             }
         };
+        Log.d(TAG, "Location updates set up.");
     }
 
     @SuppressLint("MissingPermission")
     private void startTracking() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
-            Log.e(TAG, "❌ Location permission not granted!");
+            Log.e(TAG, "Location permission not granted!");
             return;
         }
         fusedLocationClient.requestLocationUpdates(
@@ -162,102 +181,128 @@ public class TrackingService extends Service {
                         .setPriority(Priority.PRIORITY_BALANCED_POWER_ACCURACY)
                         .build(),
                 locationCallback,
-                Looper.getMainLooper()
-        );
-        Log.d(TAG, "✅ GPS/Network tracking started.");
+                Looper.getMainLooper());
+        Log.d(TAG, "GPS/Network tracking started.");
     }
 
     @SuppressLint("MissingPermission")
     private void requestImmediateLocationUpdate() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
-            Log.e(TAG, "❌ Location permission not granted!");
+            Log.e(TAG, "Location permission not granted!");
             return;
         }
         fusedLocationClient.getCurrentLocation(
-                Priority.PRIORITY_BALANCED_POWER_ACCURACY,
-                new CancellationTokenSource().getToken()
-        ).addOnSuccessListener(location -> {
-            if (location != null) {
-                updateLocation(location);
-            }
-        });
+                        Priority.PRIORITY_BALANCED_POWER_ACCURACY,
+                        new CancellationTokenSource().getToken())
+                .addOnSuccessListener(location -> {
+                    if (location != null) {
+                        Log.d(TAG, "Immediate location update received.");
+                        updateLocation(location);
+                    }
+                });
     }
 
-    // Main method that processes each location update.
+    /**
+     * Launches a high-priority full-screen prompt by sending a full-screen intent via a notification.
+     * This prompt will attempt to launch VehicleStatusActivity even when the app is minimized.
+     */
+    private void showHighPriorityVehicleStatusPrompt() {
+        Log.d(TAG, "Building high priority full-screen notification for vehicle status prompt.");
+        Intent fullScreenIntent = new Intent(this, VehicleStatusActivity.class);
+        fullScreenIntent.putExtra("message", "Are you still in a vehicle?");
+        fullScreenIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent fullScreenPendingIntent = PendingIntent.getActivity(
+                this, 0, fullScreenIntent,
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ?
+                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE :
+                        PendingIntent.FLAG_UPDATE_CURRENT);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_launcher_foreground)
+                .setContentTitle("Confirm Vehicle Status")
+                .setContentText("Are you still in a vehicle?")
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setCategory(NotificationCompat.CATEGORY_CALL)
+                .setFullScreenIntent(fullScreenPendingIntent, true)
+                .setAutoCancel(true);
+
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        if (notificationManager != null) {
+            notificationManager.notify(1002, builder.build());
+            Log.d(TAG, "High priority full-screen notification displayed.");
+        }
+    }
+
+    /**
+     * Processes each location update.
+     */
     private void updateLocation(Location location) {
         long currentTime = System.currentTimeMillis();
-        // Limit updates to every 2 seconds.
         if (currentTime - lastUpdateTime < 2000) return;
         lastUpdateTime = currentTime;
 
-        Log.d(TAG, "📍 New location: Lat=" + location.getLatitude() +
+        Log.d(TAG, "New location: Lat=" + location.getLatitude() +
                 ", Lng=" + location.getLongitude() +
-                ", Accuracy=" + location.getAccuracy() + "m" +
-                ", Speed=" + location.getSpeed() + "m/s");
+                ", Accuracy=" + location.getAccuracy() + "m, Speed=" + location.getSpeed() + "m/s");
 
         if (location.getAccuracy() > MIN_ACCURACY) {
-            Log.d(TAG, "⚠️ Poor accuracy (" + location.getAccuracy() + "m), forcing refresh.");
+            Log.d(TAG, "Location accuracy (" + location.getAccuracy() + "m) exceeds threshold. Refreshing location.");
             requestImmediateLocationUpdate();
             return;
         }
 
         float speed = location.getSpeed();
-        // Calculate new mode based solely on speed.
         String newMode = getTravelMode(speed);
+        Log.d(TAG, "Computed mode from speed (" + speed + " m/s): " + newMode);
 
-        // Check if new mode is "Walking" but last mode was a vehicle.
-        if (newMode.equals("Walking") && !lastMode.equals("Walking") && !confirmationPending) {
-            // Instead of automatically switching to Walking, ask the user.
+        // If computed mode would be "Walking" but confirmed mode is still a vehicle,
+        // then launch the high priority full-screen prompt.
+        if (newMode.equals("Walking") && !confirmedMode.equals("Walking") && !confirmationPending) {
             confirmationPending = true;
-            Intent promptIntent = new Intent("ASK_VEHICLE_STATUS");
-            promptIntent.putExtra("message", "Are you still in vehicle?");
-            promptIntent.putExtra("vehicle_mode", lastMode); // pass the previous vehicle mode
-            sendBroadcast(promptIntent);
-            Log.d(TAG, "Prompting user for vehicle status. Last mode: " + lastMode);
-            // Set a timeout (10 seconds) in case no response is received.
+            Log.d(TAG, "Condition met: newMode is Walking but confirmedMode is " + confirmedMode +
+                    ". Launching high priority full-screen prompt.");
+            showHighPriorityVehicleStatusPrompt();
             new Handler(Looper.getMainLooper()).postDelayed(() -> {
                 if (confirmationPending) {
                     confirmationPending = false;
-                    // Default answer: assume user is not in vehicle (i.e. walking).
                     selectedMode = "Walking";
-                    Log.d(TAG, "No response received. Defaulting to Walking mode.");
+                    confirmedMode = "Walking";
+                    Log.d(TAG, "No response received from full-screen prompt; defaulting to Walking mode.");
                     sendUpdates();
                 }
             }, 10000);
-            // Do not update further until confirmation is received.
             return;
         } else {
-            // No confirmation needed; use the newMode as determined.
             selectedMode = newMode;
+            if (!newMode.equals("Walking")) {
+                confirmedMode = newMode;
+            }
         }
 
-        // If there is a previous location, update totals.
         if (lastLocation != null) {
             float distance = lastLocation.distanceTo(location);
-            Log.d(TAG, "📏 Distance: " + distance + "m");
+            Log.d(TAG, "Distance from last location: " + distance + "m");
             if (distance < MIN_MOVEMENT) {
-                Log.d(TAG, "⚠️ Movement < " + MIN_MOVEMENT + "m, ignoring.");
+                Log.d(TAG, "Distance (" + distance + "m) below threshold, ignoring.");
                 return;
             }
             totalDistance += distance;
             totalCarbon = totalDistance * CarbonUtils.getCarbonEmissionRate(selectedMode);
-
-            Log.d(TAG, "Total distance: " + totalDistance + "m, Total carbon: " + totalCarbon +
-                    "kg, Mode: " + selectedMode);
+            Log.d(TAG, "Updated totals: totalDistance=" + totalDistance + "m, totalCarbon=" + totalCarbon +
+                    "kg, Mode=" + selectedMode);
 
             saveValues();
             sendUpdates();
-            Log.d(TAG, "Updating Firestore with this segment's carbon emission.");
+            Log.d(TAG, "Updating Firestore with segment carbon emission.");
             updateTransportationInFirestore(distance, selectedMode);
         }
         lastLocation = location;
-        lastMode = selectedMode; // Update lastMode for next update.
     }
 
     /**
      * Determines travel mode based on speed (m/s).
-     * Returns "Walking", "Biking", "Motorcycle", "Jeepney", or "Car".
      */
     private String getTravelMode(float speed) {
         if (speed < WALK_MAX_SPEED) {
@@ -273,32 +318,30 @@ public class TrackingService extends Service {
         }
     }
 
-    // Save current totals and mode to shared preferences.
     private void saveValues() {
         sharedPreferences.edit()
                 .putFloat("totalDistance", totalDistance)
                 .putFloat("totalCarbon", totalCarbon)
                 .putString("selected_mode", selectedMode)
                 .apply();
+        Log.d(TAG, "Saved values to SharedPreferences: selected_mode=" + selectedMode);
     }
 
-    // Broadcast current tracking updates so that the UI can update.
     private void sendUpdates() {
         Intent intent = new Intent("TRACKING_UPDATE");
         intent.putExtra("total_distance", (int) totalDistance);
         intent.putExtra("total_carbon", (int) totalCarbon);
         intent.putExtra("travel_mode", selectedMode);
         sendBroadcast(intent);
+        Log.d(TAG, "Broadcast sent with updated tracking info.");
     }
 
     /**
-     * Updates Firestore with the latest segment's carbon data.
-     * If mode is "Walking", also calculates the saved carbon emission
-     * (difference between using a car and walking).
+     * Updates Firestore with raw, reduction, and net carbon values.
      */
     private void updateTransportationInFirestore(float distance, String mode) {
-        // Calculate carbon for this segment.
         float segmentCarbon = distance * CarbonUtils.getCarbonEmissionRate(mode);
+        Log.d(TAG, "Segment carbon calculated: " + segmentCarbon + " kg for mode " + mode);
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) {
@@ -307,7 +350,7 @@ public class TrackingService extends Service {
         }
         String displayName = user.getDisplayName();
         if (displayName == null || displayName.isEmpty()) {
-            Log.e(TAG, "User has no display name; cannot update Firestore with display name as document ID.");
+            Log.e(TAG, "User has no display name; cannot update Firestore.");
             return;
         }
 
@@ -340,8 +383,13 @@ public class TrackingService extends Service {
                 }
             }
             double updatedCarbon = currentCarbon + segmentCarbon;
+            double updatedNet = updatedCarbon - currentReduction;
+            Log.d(TAG, "Firestore current values: currentCarbon=" + currentCarbon + ", currentReduction=" + currentReduction);
+            Log.d(TAG, "Calculated updatedCarbon=" + updatedCarbon + ", updatedNet=" + updatedNet);
+
             Map<String, Object> updates = new HashMap<>();
             updates.put("total_carbon_footprint", String.valueOf(updatedCarbon));
+            updates.put("net_carbon_footprint", String.valueOf(updatedNet));
 
             if (mode.equals("Walking")) {
                 float carRate = CarbonUtils.getCarbonEmissionRate("Car");
@@ -349,17 +397,16 @@ public class TrackingService extends Service {
                 float segmentReduction = distance * (carRate - walkingRate);
                 double updatedReduction = currentReduction + segmentReduction;
                 updates.put("total_carbon_reduced", String.valueOf(updatedReduction));
+                updatedNet = updatedCarbon - updatedReduction;
+                updates.put("net_carbon_footprint", String.valueOf(updatedNet));
+                Log.d(TAG, "Mode is Walking; updatedReduction=" + updatedReduction + ", new updatedNet=" + updatedNet);
             }
             docRef.set(updates, SetOptions.merge())
-                    .addOnSuccessListener(aVoid -> {
-                        Log.d(TAG, "Firestore updated. New total carbon: " + updatedCarbon +
-                                (mode.equals("Walking") ? ", and carbon reduction updated." : ""));
-                    })
+                    .addOnSuccessListener(aVoid -> Log.d(TAG, "Firestore successfully updated."))
                     .addOnFailureListener(e -> Log.e(TAG, "Failed to update Firestore", e));
         }).addOnFailureListener(e -> Log.e(TAG, "Failed to get daily document for " + displayName, e));
     }
 
-    // Returns the current date as a string in "yyyy-MM-dd" format.
     private String getCurrentDateString() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         return sdf.format(new Date());
@@ -379,6 +426,7 @@ public class TrackingService extends Service {
         super.onDestroy();
         fusedLocationClient.removeLocationUpdates(locationCallback);
         unregisterReceiver(vehicleStatusReceiver);
+        Log.d(TAG, "Service destroyed, receivers unregistered.");
     }
 
     @Nullable

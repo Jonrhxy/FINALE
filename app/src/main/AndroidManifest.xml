@@ -42,7 +42,17 @@
             android:foregroundServiceType="location"
             tools:replace="android:foregroundServiceType" />
 
-        <!-- List of activities -->
+        <!-- Full-screen activity for vehicle status prompt -->
+        <activity
+            android:name=".VehicleStatusActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen"
+            android:launchMode="singleInstance"
+            android:excludeFromRecents="true"
+            android:taskAffinity=""
+            android:finishOnTaskLaunch="true"
+            android:exported="false" />
+
+        <!-- List of other activities -->
         <activity android:name=".Winner" android:exported="false" />
         <activity
             android:name=".BattleEcoActivity"
@@ -108,5 +118,4 @@
             </intent-filter>
         </activity>
     </application>
-
 </manifest>
