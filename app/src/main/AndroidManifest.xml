@@ -78,7 +78,12 @@
         <activity android:name=".Jar" />
         <activity android:name=".Barrier" />
         <activity android:name=".Environment" />
-        <activity android:name=".GameActivity1" />
+        <activity
+            android:name=".GameActivity1"
+            android:exported="true"
+            android:screenOrientation="landscape"
+            android:configChanges="orientation|screenSize">
+        </activity>
         <activity android:name=".GameOver" />
         <activity android:name=".GameActivity" />
         <activity android:name=".Game1Tut" android:exported="false" />
