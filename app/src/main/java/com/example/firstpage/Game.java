@@ -18,6 +18,7 @@ public class Game extends AppCompatActivity {
         Button playButton = findViewById(R.id.playButton1);
         Button playButton2 = findViewById(R.id.playButton2);
         Button playButton3 = findViewById(R.id.playButton3);
+        Button playButton4 = findViewById(R.id.playButton4);
 
         // Set an OnClickListener for the Play button
         playButton.setOnClickListener(new View.OnClickListener() {
@@ -43,6 +44,15 @@ public class Game extends AppCompatActivity {
             public void onClick(View v) {
                 // Navigate to GameView activity
                 Intent intent = new Intent(Game.this, BattleEcoActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        playButton4.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Navigate to GameView activity
+                Intent intent = new Intent(Game.this, GameActivity1.class);
                 startActivity(intent);
             }
         });

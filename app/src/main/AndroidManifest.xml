@@ -78,6 +78,7 @@
         <activity android:name=".Jar" />
         <activity android:name=".Barrier" />
         <activity android:name=".Environment" />
+        <activity android:name=".GameActivity1" />
         <activity android:name=".GameOver" />
         <activity android:name=".GameActivity" />
         <activity android:name=".Game1Tut" android:exported="false" />

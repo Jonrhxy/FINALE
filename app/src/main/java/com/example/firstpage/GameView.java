@@ -21,8 +21,12 @@ import androidx.annotation.NonNull;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 public class GameView extends View {
@@ -60,7 +64,6 @@ public class GameView extends View {
     String storylineMessage = "";
     long messageTime = 0;
     private static final long ANIM_DURATION = 1000; // 1 second for the typewriter effect
-
 
     public GameView(Context context) {
         super(context);
@@ -124,7 +127,7 @@ public class GameView extends View {
         textPaint.setTextAlign(Paint.Align.LEFT);
         textPaint.setColor(0xFFFFFFFF);
 
-        // **FIX: Initialize messagePaint to avoid NullPointerException**
+        // Initialize messagePaint to avoid NullPointerException
         messagePaint = new Paint();
         messagePaint.setTextSize(TEXT_SIZE);
         messagePaint.setTextAlign(Paint.Align.CENTER);
@@ -167,7 +170,7 @@ public class GameView extends View {
                     if (mpLoseLife != null) mpLoseLife.start();
                     if (life == 0) {
                         updateHighScore();
-                        saveGameDataToFirestore();
+                        // No additional firebase update here since we update on every score increment
                         Intent intent = new Intent(context, GameOver.class);
                         intent.putExtra("points", points);
                         context.startActivity(intent);
@@ -254,14 +257,12 @@ public class GameView extends View {
             int maxTextWidth = bubbleTextImage.getWidth() - 2 * bubblePadding;
 
             // --- Begin Typewriter Animation Section ---
-            // Calculate how many characters to reveal (animation lasts for ANIM_DURATION ms)
             int totalChars = message.length();
             int charsToShow = (int) (totalChars * Math.min(1f, elapsed / (float) ANIM_DURATION));
-            // Use the substring of the message for the animation
             String animatedText = message.substring(0, charsToShow);
             // --- End Typewriter Animation Section ---
 
-            // Now, perform word wrapping on the animated text
+            // Word wrapping
             String[] words = animatedText.split(" ");
             StringBuilder wrappedText = new StringBuilder();
             StringBuilder line = new StringBuilder();
@@ -276,13 +277,11 @@ public class GameView extends View {
             wrappedText.append(line);
             String[] lines = wrappedText.toString().split("\n");
 
-            // Center text vertically in the bubble
             Paint.FontMetrics fm = textPaint.getFontMetrics();
             float lineHeight = fm.descent - fm.ascent;
             float totalTextHeight = lines.length * lineHeight;
             float textStartY = bubbleY + (bubbleTextImage.getHeight() - totalTextHeight) / 2 - fm.ascent;
 
-            // Draw each line centered horizontally
             for (String l : lines) {
                 String trimmedLine = l.trim();
                 float lineWidth = textPaint.measureText(trimmedLine);
@@ -291,7 +290,6 @@ public class GameView extends View {
                 textStartY += lineHeight;
             }
         }
-
 
         // Draw hearts for lives
         for (int i = 0; i < life; i++) {
@@ -325,6 +323,8 @@ public class GameView extends View {
                         if (isHealthy[i]) {
                             checkStorylineMilestone();
                             points++;
+                            // Update Firebase highScore field by incrementing by 1
+                            updateFirebaseHighScoreIncrement(1);
                             if (points % 10 == 0) {
                                 message = "Eating plant-based food reduces your carbon footprint!";
                                 showMessage = true;
@@ -335,7 +335,7 @@ public class GameView extends View {
                             if (mpLoseLife != null) mpLoseLife.start();
                             if (life == 0) {
                                 updateHighScore();
-                                saveGameDataToFirestore();  // Save to Firestore when the game ends
+                                // No need to call saveGameDataToFirestore() here since we update incrementally
                                 Intent intent = new Intent(context, GameOver.class);
                                 intent.putExtra("points", points);
                                 context.startActivity(intent);
@@ -353,7 +353,7 @@ public class GameView extends View {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();  // Log the exception to help with debugging
+            e.printStackTrace();
         }
         return true;
     }
@@ -367,28 +367,21 @@ public class GameView extends View {
         }
     }
 
-    // Save game data to Firestore
-    private void saveGameDataToFirestore() {
+    /**
+     * Increment the Firebase "highScore" field by a specified amount.
+     * This update is sent every time the user earns at least one point,
+     * and it does not change your in-game (local) high score.
+     */
+    private void updateFirebaseHighScoreIncrement(int increment) {
         DocumentReference gameRef = db.collection("Games").document(username);
-        gameRef.set(new GameData(points, highScore))
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("highScore", FieldValue.increment(increment));
+        gameRef.set(updates, SetOptions.merge())
                 .addOnSuccessListener(aVoid -> {
-                    // Handle success
-                    System.out.println("Game data saved successfully!");
+                    System.out.println("Firebase highScore incremented by " + increment);
                 })
                 .addOnFailureListener(e -> {
-                    // Handle failure
-                    System.err.println("Error saving game data: " + e.getMessage());
+                    System.err.println("Error updating Firebase highScore: " + e.getMessage());
                 });
-    }
-
-    // Game data model class for Firestore
-    public static class GameData {
-        public int points;
-        public int highScore;
-
-        public GameData(int points, int highScore) {
-            this.points = points;
-            this.highScore = highScore;
-        }
     }
 }

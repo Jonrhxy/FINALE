@@ -48,7 +48,7 @@ public class InProgressFragment extends Fragment {
 
         // Set the click listener
         btnStartChallenge3.setOnClickListener(v -> {
-            Intent intent = new Intent(requireActivity(), Chall3.class);
+            Intent intent = new Intent(requireActivity(), Bfast1Fragment.class);
             startActivity(intent);
         });
 
